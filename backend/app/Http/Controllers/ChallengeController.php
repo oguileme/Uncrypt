@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Challenge;
+use App\Models\Phrase;
 use Illuminate\Http\Request;
+use Throwable;
 
 class ChallengeController extends Controller
 {
@@ -82,5 +84,32 @@ class ChallengeController extends Controller
         //
         $challenge->delete();
         return response()->json(null, 204);
+    }
+
+    //esse metodo esta errado, altere quando puder
+    public function attemptChallenge(Challenge $challenge, Request $request){
+        $attempt = $request->validate([
+            'attempt' => 'required|string'
+        ]);
+
+        try{
+            $phrase = Phrase::find($challenge->phrase_id);
+
+            $pivot = $challenge->users()
+                ->where('user_id', auth()->id())
+                ->firstOrFail()
+                ->pivot;
+
+            if($phrase->text == $attempt['attempt']){
+                $pivot->increment('attempts');
+                $pivot->update(['is_complete' => true]);
+                return response()->json(['message' => 'certa resposta'], 200);
+            }else{
+                $pivot->increment('attempts');
+                return response()->json(['message' => 'resposta errada'], 200);
+            }
+        }catch(\Throwable $th){
+            return response()->json(['erro' => $th->getMessage()], 500);
+        }
     }
 }
