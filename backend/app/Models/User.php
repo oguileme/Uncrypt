@@ -29,4 +29,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function challenges()
+    {
+        return $this->belongsToMany(Challenge::class, 'challenge_user')
+            ->withPivot('is_complete', 'attempts')
+            ->withTimestamps();
+    }
 }
