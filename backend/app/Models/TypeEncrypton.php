@@ -11,5 +11,8 @@ class TypeEncrypton extends Model
 
     protected $fillable = ['name', 'description'];
 
-    
+    public function challenges()
+    {
+        return $this->hasMany(Challenge::class);
+    }
 }

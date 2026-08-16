@@ -22,4 +22,9 @@ class Challenge extends Model
     {
         return $this->belongsTo(Phrase::class);
     }
+
+    public function typeEncryption()
+    {
+        return $this->belongsTo(TypeEncryption::class);
+    }
 }
