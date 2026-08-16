@@ -17,4 +17,9 @@ class Challenge extends Model
             ->withPivot('is_complete', 'attempts')
             ->withTimestamps();
     }
+
+    public function phrase()
+    {
+        return $this->belongsTo(Phrase::class);
+    }
 }

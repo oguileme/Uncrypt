@@ -9,4 +9,9 @@ class Phrase extends Model
     //
     protected $table = 'phrase';
     protected $fillable = ['phrase'];
+
+    public function challenges()
+    {
+        return $this->hasMany(Challenge::class);
+    }
 }
