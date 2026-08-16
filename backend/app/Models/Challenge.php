@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class Challenge extends Model
 {
     //
@@ -25,6 +26,6 @@ class Challenge extends Model
 
     public function typeEncryption()
     {
-        return $this->belongsTo(TypeEncryption::class);
+        return $this->belongsTo(TypeEncrypton::class);
     }
 }
