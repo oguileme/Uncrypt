@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->foreignId('type_encryption_id')->constrained()->onDelete('cascade');
-            $table->foreignId('phrase_id')->constrained()->onDelete('cascade');
+            $table->foreignId('type_encryption_id')->references('id')->on('type_encryption')->onDelete('cascade');
+            $table->foreignId('phrase_id')->references('id')->on('phrase')->onDelete('cascade');
             $table->timestamps();
         });
     }
