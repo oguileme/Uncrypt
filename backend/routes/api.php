@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KeyController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\ChallengeController;
+use App\Http\Controllers\TypeEncryptonController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -13,11 +14,16 @@ Route::get('/user', function (Request $request) {
 
 //Route::resource('users', UserController::class);
 
-Route::resource('keys', KeyController::class);
-Route::resource('phrases', PhraseController::class);
+Route::resource('/keys', KeyController::class);
+Route::resource('/phrases', PhraseController::class);
+Route::resource('/type-encryption', TypeEncryptonController::class);
 
-Route::resource('challenges', ChallengeController::class);
-Route::post('challenge/attempt/{attempt}', [ChallengeController::class, 'attemptChallenge'])->name('challenge.attempt');
+Route::resource('/challenges', ChallengeController::class);
+Route::post('/challenge/attempt/{attempt}', [ChallengeController::class, 'attemptChallenge'])->name('challenge.attempt');
+
+Route::get('/test-cesar', function(){
+    return App\Helpers\CipherHelper::CesarEncrypt("guilherme", 1);
+});
 
 
 

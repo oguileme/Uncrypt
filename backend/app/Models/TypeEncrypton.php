@@ -9,7 +9,7 @@ class TypeEncrypton extends Model
     //
     protected $table = 'type_encryption';
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'difficulty'];
 
     public function challenges()
     {

@@ -33,6 +33,7 @@ class TypeEncryptonController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
+            'difficulty' => 'required|in:easy,medium,hard',
         ]);
         $typeEncrypton = TypeEncrypton::create($data);
         return response()->json($typeEncrypton, 201);
@@ -64,6 +65,7 @@ class TypeEncryptonController extends Controller
         $data = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'sometimes|string|max:255',
+            'difficulty' => 'sometimes|in:easy,medium,hard',
         ]);
         $typeEncrypton->update($data);
         return response()->json($typeEncrypton);
