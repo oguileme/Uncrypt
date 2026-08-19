@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +6,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'landing',
-      component: HomeView,
+      component: () => import('../features/landing/LandingPage.vue'),
     },
     {
       path: '/login',
@@ -18,6 +17,11 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: () => import('../features/auth/views/RegisterPage.vue'),
+    },
+    {
+      path: '/challenge',
+      name: 'challenge',
+      component: () => import('../features/challenge/ChallengePage.vue'),
     },
   ],
 })
