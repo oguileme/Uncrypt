@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'challenge',
       component: () => import('../features/challenge/ChallengePage.vue'),
     },
+    {
+      path: '/home',
+      name: 'home',
+      component: () => import('../features/home/HomePage.vue'),
+    }
   ],
 })
 
