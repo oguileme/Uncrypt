@@ -12,7 +12,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-//Route::resource('users', UserController::class);
+Route::resource('users', UserController::class);
 
 Route::resource('/keys', KeyController::class);
 Route::resource('/phrases', PhraseController::class);
