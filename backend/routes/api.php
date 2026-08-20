@@ -25,5 +25,8 @@ Route::get('/test-cesar', function(){
     return App\Helpers\CipherHelper::CesarEncrypt("guilherme", 1);
 });
 
+Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+
 
 
