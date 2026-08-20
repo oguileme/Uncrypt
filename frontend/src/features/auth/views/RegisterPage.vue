@@ -1,11 +1,48 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { register } from '../services/authService'
+
+const router = useRouter()
 
 const name = ref('')
+const username = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+
+async function handleSubmit() {
+  errorMessage.value = ''
+
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = 'As senhas não coincidem.'
+    return
+  }
+
+  loading.value = true
+  try {
+    await register({
+      name: name.value,
+      username: username.value,
+      email: email.value,
+      password: password.value,
+    })
+    router.push('/login')
+  } catch (err: any) {
+    if (err.response?.status === 422) {
+      const errors = err.response.data.errors
+      const first = Object.values(errors)[0]
+      errorMessage.value = Array.isArray(first) ? first[0] : 'Erro de validação.'
+    } else {
+      errorMessage.value = 'Erro ao criar conta. Tente novamente.'
+    }
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -29,7 +66,7 @@ const showPassword = ref(false)
           <p class="auth-subtitle">Comece a resolver desafios em segundos</p>
         </div>
 
-        <form class="auth-form" @submit.prevent>
+        <form class="auth-form" @submit.prevent="handleSubmit">
           <div class="form-group">
             <label for="name" class="form-label">Nome</label>
             <input
@@ -39,6 +76,18 @@ const showPassword = ref(false)
               class="form-input"
               placeholder="Seu nome de decifrador"
               autocomplete="name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input
+              id="username"
+              v-model="username"
+              type="text"
+              class="form-input"
+              placeholder="Seu nome de usuário"
+              autocomplete="username"
             />
           </div>
 
@@ -111,7 +160,11 @@ const showPassword = ref(false)
             />
           </div>
 
-          <button type="submit" class="btn-submit">Criar Conta</button>
+          <p v-if="errorMessage" class="form-error">{{ errorMessage }}</p>
+
+          <button type="submit" class="btn-submit" :disabled="loading">
+            {{ loading ? 'Criando conta...' : 'Criar Conta' }}
+          </button>
         </form>
 
         <p class="auth-switch">
@@ -318,6 +371,17 @@ const showPassword = ref(false)
 .auth-switch a {
   color: var(--accent-blue);
   font-weight: 500;
+}
+
+.form-error {
+  font-size: 13px;
+  color: #f85149;
+  text-align: center;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
