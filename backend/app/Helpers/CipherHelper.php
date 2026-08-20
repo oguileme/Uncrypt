@@ -26,4 +26,20 @@ class CipherHelper
         // para descriptografar, basta chamar a função de criptografia com o deslocamento negativo
         return self::CesarEncrypt($text, -$shift);
     }
+
+    public static function ROT13Encrypt(String $text){
+        return self::CesarEncrypt($text, 13);
+    }
+
+    public static function ROT13Decrypt(String $text){
+        return self::CesarDecrypt($text, -13);
+    }
+
+    public static function base64Encrypt(String $text){
+        return base64_encode($text);
+    }
+
+    public static function base64Decrypt(String $text){
+        return base64_decode($text);
+    }
 }
