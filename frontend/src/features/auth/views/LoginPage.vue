@@ -1,9 +1,33 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { login } from '../services/authService'
+import { useAuth } from '../composables/useAuth'
+
+const router = useRouter()
+const { setAuth } = useAuth()
 
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+
+async function handleSubmit() {
+  errorMessage.value = ''
+  loading.value = true
+  try {
+    const { user, token } = await login({ email: email.value, password: password.value })
+    setAuth(user, token)
+    router.push('/home')
+  } catch (err: any) {
+    errorMessage.value = err.response?.status === 401
+      ? 'Email ou senha inválidos.'
+      : 'Erro ao entrar. Tente novamente.'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -27,7 +51,7 @@ const showPassword = ref(false)
           <p class="auth-subtitle">Entre na sua conta para continuar decifrando</p>
         </div>
 
-        <form class="auth-form" @submit.prevent>
+        <form class="auth-form" @submit.prevent="handleSubmit">
           <div class="form-group">
             <label for="email" class="form-label">Email</label>
             <input
@@ -56,6 +80,7 @@ const showPassword = ref(false)
                 class="password-toggle"
                 @click="showPassword = !showPassword"
                 :title="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                :disabled="loading"
               >
                 <svg
                   v-if="!showPassword"
@@ -88,7 +113,10 @@ const showPassword = ref(false)
           <div class="form-extras">
             <a href="#" class="forgot-link">Esqueceu a senha?</a>
           </div>
-
+          
+          <p v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </p>
           <button type="submit" class="btn-submit">Entrar</button>
         </form>
 
@@ -325,5 +353,9 @@ const showPassword = ref(false)
   .auth-form-side {
     padding: 32px 24px 48px;
   }
+}
+.error-message {
+  font-size: 13px;
+  color: #f85149;
 }
 </style>
