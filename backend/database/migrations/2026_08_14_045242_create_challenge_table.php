@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('key');
             $table->integer('xp')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->string('hint');
             $table->timestamps();
         });
     }

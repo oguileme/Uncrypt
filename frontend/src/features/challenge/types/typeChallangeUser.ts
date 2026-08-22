@@ -5,4 +5,5 @@ export interface ChallengeUserType {
   attempts: number
   is_completed: boolean
   time_taken: number
+  hint_used: boolean
 }

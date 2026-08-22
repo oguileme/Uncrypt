@@ -6,6 +6,7 @@ export interface ChallengeType {
   phrase: string
   key: string
   xp: number
+  hint: string
 }
 
 

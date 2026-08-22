@@ -18,6 +18,7 @@ return new class extends Migration
             $table->boolean('completed')->default(false);
             $table->integer('attempts')->default(0);
             $table->integer('time_taken')->nullable();
+            $table->boolean('hint_used')->default(false);
             $table->timestamps();
         });
     }
