@@ -3,8 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\KeyController;
-use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\TypeEncryptonController;
 
@@ -14,8 +12,6 @@ Route::get('/user', function (Request $request) {
 
 Route::resource('users', UserController::class);
 
-Route::resource('/keys', KeyController::class);
-Route::resource('/phrases', PhraseController::class);
 Route::resource('/type-encryption', TypeEncryptonController::class);
 
 Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
