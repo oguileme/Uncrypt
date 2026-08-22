@@ -29,7 +29,7 @@ const router = createRouter({
     {
       path: '/challenge',
       name: 'challenge',
-      component: () => import('../features/challenge/ChallengePage.vue'),
+      component: () => import('../features/challenge/views/ChallengePage.vue'),
     },
 
     {
@@ -37,6 +37,12 @@ const router = createRouter({
       name: 'home',
       component: () => import('../features/home/HomePage.vue'),
     },
+
+    {
+      path: '/Challenge/:id',
+      name: 'challenge-detail',
+      component: () => import('../features/challenge/views/ChallengeUser.vue'),
+    }
   ],
 })
 

@@ -1,4 +1,13 @@
 export interface ChallengeType {
   id: number
-  name: string
+  title: string
+  description: string
+  type_encryption_id: number
+  phrase: string
+  key: string
+  xp: number
 }
+
+
+
+
