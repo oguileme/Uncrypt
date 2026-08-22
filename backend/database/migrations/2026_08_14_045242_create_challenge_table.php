@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->foreignId('type_encryption_id')->references('id')->on('type_encryption')->onDelete('cascade');
-            $table->foreignId('phrase_id')->references('id')->on('phrase')->onDelete('cascade');
+            $table->string('phrase');
+            $table->string('key');
+            $table->integer('xp')->default(0);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

@@ -37,7 +37,9 @@ class ChallengeController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'type_encryption_id' => 'required|integer| exists:type_encryption,id',
-            'phrase_id' => 'required|integer| exists:phrases,id',
+            'phrase' => 'required|string|max:255',
+            'key' => 'sometimes|string|max:255',
+            'xp' => 'required|integer',
         ]);
         $challenge = Challenge::create($data);
         return response()->json($challenge, 201);
@@ -67,10 +69,12 @@ class ChallengeController extends Controller
     {
         //
         $data =$request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'type_encryption_id' => 'required|integer| exists:type_encryption,id',
-            'phrase_id' => 'required|integer| exists:phrases,id',
+            'title' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string|max:255',
+            'type_encryption_id' => 'sometimes|integer| exists:type_encryption,id',
+            'phrase' => 'sometimes|string|max:255',
+            'key' => 'sometimes|string|max:255',
+            'xp' => 'sometimes|integer',
         ]);
         $challenge->update($data);
         return response()->json($challenge);
@@ -93,7 +97,7 @@ class ChallengeController extends Controller
         ]);
 
         try{
-            $phrase = Phrase::find($challenge->phrase_id);
+            $phrase = $challenge->phrase;
 
             $pivot = $challenge->users()
                 ->where('user_id', auth()->id())

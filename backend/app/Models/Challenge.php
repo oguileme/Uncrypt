@@ -10,7 +10,7 @@ class Challenge extends Model
     //
     protected $table = 'challenge';
 
-    protected $fillable = ['title', 'description', 'type_encryption_id', 'phrase_id'];
+    protected $fillable = ['title', 'description', 'type_encryption_id', 'phrase', 'key', 'xp', 'is_active'];
 
     public function users()
     {
@@ -19,10 +19,6 @@ class Challenge extends Model
             ->withTimestamps();
     }
 
-    public function phrase()
-    {
-        return $this->belongsTo(Phrase::class);
-    }
 
     public function typeEncryption()
     {
