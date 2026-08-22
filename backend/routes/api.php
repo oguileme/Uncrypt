@@ -18,18 +18,8 @@ Route::resource('/keys', KeyController::class);
 Route::resource('/phrases', PhraseController::class);
 Route::resource('/type-encryption', TypeEncryptonController::class);
 
-Route::resource('/challenges', ChallengeController::class);
-Route::post('/challenge/attempt/{attempt}', [ChallengeController::class, 'attemptChallenge'])->name('challenge.attempt');
-
-Route::get('/test-cesar', function(){
-    return App\Helpers\CipherHelper::CesarEncrypt("guilherme", 1);
-});
-
 Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
 Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
-
-
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
