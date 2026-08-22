@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { logout } from '@/features/auth/services/authService'
+import { useAuth } from '@/features/auth/composables/useAuth'
+
+const router = useRouter()
+const { clearAuth } = useAuth()
 
 const menuOpen = ref(false)
 const route = useRoute()
@@ -16,6 +21,13 @@ function toggleDropdown() {
 
 function closeDropdown() {
   dropdownOpen.value = false
+}
+
+async function handleLogout() {
+  closeDropdown()
+  try { await logout() } catch {}
+  clearAuth()
+  router.push('/')
 }
 
 function handleClickOutside(e: MouseEvent) {
@@ -108,14 +120,14 @@ onUnmounted(() => {
                     Configura&ccedil;&otilde;es
                   </a>
                   <div class="dropdown-divider"></div>
-                  <RouterLink to="/" class="dropdown-item dropdown-item-danger" @click="closeDropdown">
+                  <button class="dropdown-item dropdown-item-danger" @click="handleLogout">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                       <polyline points="16 17 21 12 16 7" />
                       <line x1="21" y1="12" x2="9" y2="12" />
                     </svg>
                     Sair
-                  </RouterLink>
+                  </button>
                 </div>
               </Transition>
             </div>
