@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\TypeEncryptonController;
+use App\Http\Controllers\ChallangeUserController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -22,8 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::resource('/challenges', ChallengeController::class);
 
+    Route::resource('/challenge-users', ChallangeUserController::class)->only(['index', 'show', 'store', 'update']);
+
     Route::post(
-        '/challenge/attempt/{attempt}',
-        [ChallengeController::class, 'attemptChallenge']
-    )->name('challenge.attempt');
+        '/challenge-users/{challengeUser}/attempt',
+        [ChallangeUserController::class, 'attempt']
+    )->name('challenge-user.attempt');
 });

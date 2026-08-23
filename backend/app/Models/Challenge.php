@@ -15,7 +15,7 @@ class Challenge extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'challenge_user')
-            ->withPivot('is_complete', 'attempts')
+            ->withPivot('completed', 'attempts')
             ->withTimestamps();
     }
 

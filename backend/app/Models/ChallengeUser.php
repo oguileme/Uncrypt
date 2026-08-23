@@ -12,8 +12,10 @@ class ChallengeUser extends Model
     protected $fillable = [
         'user_id',
         'challenge_id',
-        'is_complete',
+        'completed',
         'attempts',
+        'time_taken',
+        'hint_used',
     ];
 
     public function user()
