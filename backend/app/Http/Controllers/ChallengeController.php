@@ -3,19 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Challenge;
-use App\Models\Phrase;
+use App\Helpers\CipherHelper;
 use Illuminate\Http\Request;
 use Throwable;
 
 class ChallengeController extends Controller
 {
+    // anexa o texto cifrado (gerado pelo CipherHelper) e esconde a resposta original
+    private function withCiphertext(Challenge $challenge): Challenge
+    {
+        $challenge->load('typeEncryption');
+        $challenge->ciphertext = CipherHelper::encryptByTypeName(
+            $challenge->typeEncryption->name,
+            $challenge->phrase,
+            $challenge->key
+        );
+
+        return $challenge;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         //
-        return response()->json(Challenge::all());
+        return response()->json(
+            Challenge::with('typeEncryption')
+                ->get()
+                ->map(fn (Challenge $c) => $this->withCiphertext($c)->makeHidden('phrase'))
+        );
     }
 
     /**
@@ -40,6 +57,7 @@ class ChallengeController extends Controller
             'phrase' => 'required|string|max:255',
             'key' => 'sometimes|string|max:255',
             'xp' => 'required|integer',
+            'hint' => 'required|string|max:255',
         ]);
         $challenge = Challenge::create($data);
         return response()->json($challenge, 201);
@@ -51,7 +69,7 @@ class ChallengeController extends Controller
     public function show(Challenge $challenge)
     {
         //
-        return response()->json($challenge);
+        return response()->json($this->withCiphertext($challenge)->makeHidden('phrase'));
     }
 
     /**
@@ -75,6 +93,7 @@ class ChallengeController extends Controller
             'phrase' => 'sometimes|string|max:255',
             'key' => 'sometimes|string|max:255',
             'xp' => 'sometimes|integer',
+            'hint' => 'sometimes|string|max:255',
         ]);
         $challenge->update($data);
         return response()->json($challenge);
