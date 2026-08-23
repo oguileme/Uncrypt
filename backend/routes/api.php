@@ -29,4 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
         '/challenge-users/{challengeUser}/attempt',
         [ChallangeUserController::class, 'attempt']
     )->name('challenge-user.attempt');
+
+    Route::get('/user/metrics', [UserController::class, 'getUserMetrics'])->name('user.metrics');
+    
 });

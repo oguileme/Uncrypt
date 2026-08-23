@@ -84,4 +84,20 @@ class UserController extends Controller
         $user->delete();
         return response()->json(null, 204);
     }
+
+    public function getUserMetrics()
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $user = auth()->user();
+
+        $metrics = [
+            'challenges_completed' => $user->challengesCompleted(),
+            'accuracy_rate' => round($user->accuracyRate(), 1),
+            'avg_time_per_challenge' => round($user->avgTimePerChallenge()),
+        ];
+
+        return response()->json($metrics);
+    }
 }
