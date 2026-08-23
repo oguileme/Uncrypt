@@ -13,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // API pura: convidados nao devem ser redirecionados para uma rota 'login' web
+        // (que nao existe); o AuthenticationException vira 401 JSON.
+        $middleware->redirectGuestsTo(fn () => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
