@@ -70,4 +70,4 @@ npm run dev                 # http://localhost:5173
 
 ## Autor
 
-Guilherme — estudante de Engenharia de Software (UNIPAMPA, Campus Alegrete)
+Guilherme Moreira Rocha — estudante de Engenharia de Software (UNIPAMPA, Campus Alegrete)
