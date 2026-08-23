@@ -39,6 +39,14 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 - Histórico de desafios e reforço dos já resolvidos
 - Testes automatizados
 
+### Infraestrutura
+
+- Containerização com Docker e docker-compose (backend, frontend e banco)
+- Filas de processamento assíncrono (Laravel Queues + Redis)
+- API Gateway com rate limiting e autenticação centralizada
+- Cache com Redis
+- Pipeline de CI/CD (testes automatizados e deploy)
+
 ## Como rodar
 
 ### Backend
