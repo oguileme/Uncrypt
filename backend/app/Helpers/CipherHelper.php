@@ -42,4 +42,14 @@ class CipherHelper
     public static function base64Decrypt(String $text){
         return base64_decode($text);
     }
+
+    // aplica a cifra correspondente ao tipo de criptografia cadastrado no banco
+    public static function encryptByTypeName(String $typeName, String $text, ?String $key = null): String{
+        return match($typeName){
+            'Cifra de Cesar' => self::CesarEncrypt($text, $key ?? '3'),
+            'ROT13' => self::ROT13Encrypt($text),
+            'Base64' => self::base64Encrypt($text),
+            default => $text,
+        };
+    }
 }
