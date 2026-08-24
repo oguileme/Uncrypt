@@ -105,7 +105,7 @@ onUnmounted(() => {
 
               <Transition name="dropdown">
                 <div v-if="dropdownOpen" class="dropdown-menu">
-                  <RouterLink to="/home" class="dropdown-item" @click="closeDropdown">
+                  <RouterLink to="/profile" class="dropdown-item" @click="closeDropdown">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
