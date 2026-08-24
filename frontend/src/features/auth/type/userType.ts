@@ -3,10 +3,10 @@ export interface UserType {
     name: string;
     username: string;
     email: string;
-    password: string;
+    password?: string;
     level: number;
     xp_progress: number;
-    xp_levelUp: number;
+    xp_levelup: number;
     created_at: string;
 }
 

@@ -1,3 +1,48 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+
+interface Props {
+  level?: number
+  xpProgress?: number
+  xpLevelup?: number
+  accuracyRate?: number
+  challengesCompleted?: number
+  avgTime?: number
+}
+
+const props = defineProps<Props>()
+
+const rankLabel = computed(() => {
+  const l = props.level
+  if (l == null) return null
+  if (l <= 2) return 'Iniciante'
+  if (l <= 4) return 'Cript\u00f3grafo J\u00fanior'
+  if (l <= 6) return 'Cript\u00f3grafo Pleno'
+  return 'Cript\u00f3grafo S\u00eanior'
+})
+
+const xpPercent = computed(() => {
+  const { xpProgress, xpLevelup } = props
+  if (xpProgress == null || !xpLevelup) return 0
+  return Math.min(100, Math.round((xpProgress / xpLevelup) * 100))
+})
+
+const xpRemaining = computed(() => {
+  const { xpProgress, xpLevelup } = props
+  if (xpProgress == null || xpLevelup == null) return null
+  return Math.max(0, xpLevelup - xpProgress)
+})
+
+function formatAvgTime(seconds?: number): string {
+  if (seconds == null) return '\u2014'
+  const s = Math.round(seconds)
+  if (s < 60) return `${s}s`
+  const m = Math.floor(s / 60)
+  const rest = s % 60
+  return rest ? `${m}m ${rest}s` : `${m}m`
+}
+</script>
+
 <template>
   <div class="stats-grid">
     <div class="stat-card">
@@ -9,10 +54,10 @@
         </svg>
       </div>
       <div class="stat-info">
-        <span class="stat-value">7</span>
+        <span class="stat-value">{{ level ?? '\u2014' }}</span>
         <span class="stat-label">N&iacute;vel</span>
       </div>
-      <span class="stat-sub">Cript&oacute;grafo J&uacute;nior</span>
+      <span v-if="rankLabel" class="stat-sub">{{ rankLabel }}</span>
     </div>
 
     <div class="stat-card">
@@ -22,28 +67,32 @@
         </svg>
       </div>
       <div class="stat-info">
-        <span class="stat-value">1.250</span>
-        <span class="stat-label">XP Total</span>
+        <span class="stat-value">{{ xpProgress ?? '\u2014' }}</span>
+        <span class="stat-label">XP do N&iacute;vel</span>
       </div>
-      <div class="stat-progress">
+      <div v-if="xpProgress != null && xpLevelup != null" class="stat-progress">
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 83%"></div>
+          <div class="progress-fill" :style="{ width: xpPercent + '%' }"></div>
         </div>
-        <span class="progress-text">Pr&oacute;ximo: 1.500 XP</span>
+        <span class="progress-text">
+          {{ xpRemaining === 0 ? 'Nível completo!' : `Faltam ${xpRemaining} XP` }}
+        </span>
       </div>
     </div>
 
     <div class="stat-card">
       <div class="stat-icon icon-orange">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M12 23c-4.97 0-9-3.58-9-8 0-3.19 2.13-6.04 3.5-7.5C8 6 9.5 4 9.5 2c1.5 2 3 4 3.5 5 .5-1 1.5-2 2.5-3 0 2 .5 3.5 1.5 5 1 1.5 2.5 3 2.5 5 0 4.42-4.03 8-9 8z" />
+          <circle cx="12" cy="13" r="8" />
+          <path d="M12 9v4l2.5 2.5" />
+          <path d="M9 2h6" />
         </svg>
       </div>
       <div class="stat-info">
-        <span class="stat-value">12</span>
-        <span class="stat-label">Dias Seguidos</span>
+        <span class="stat-value">{{ formatAvgTime(avgTime) }}</span>
+        <span class="stat-label">Tempo M&eacute;dio</span>
       </div>
-      <span class="stat-sub">Recorde: 18 dias</span>
+      <span class="stat-sub">por desafio resolvido</span>
     </div>
 
     <div class="stat-card">
@@ -54,10 +103,14 @@
         </svg>
       </div>
       <div class="stat-info">
-        <span class="stat-value">76%</span>
+        <span class="stat-value">{{ accuracyRate != null ? accuracyRate + '%' : '\u2014' }}</span>
         <span class="stat-label">Taxa de Acerto</span>
       </div>
-      <span class="stat-sub">23 de 30 resolvidos</span>
+      <span v-if="challengesCompleted != null" class="stat-sub">
+        {{ challengesCompleted }} desafio{{ challengesCompleted === 1 ? '' : 's' }} resolvido{{
+          challengesCompleted === 1 ? '' : 's'
+        }}
+      </span>
     </div>
   </div>
 </template>
