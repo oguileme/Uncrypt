@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { logout } from '@/features/auth/services/authService'
 import { useAuth } from '@/features/auth/composables/useAuth'
 
 const router = useRouter()
-const { clearAuth } = useAuth()
+const { clearAuth, isLoggedIn } = useAuth()
 
 const menuOpen = ref(false)
 const route = useRoute()
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
-
-const publicRoutes = ['/', '/login', '/register']
-const isLoggedIn = computed(() => !publicRoutes.includes(route.path))
 
 function toggleDropdown() {
   dropdownOpen.value = !dropdownOpen.value
