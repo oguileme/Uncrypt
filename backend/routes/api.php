@@ -31,5 +31,6 @@ Route::middleware('auth:sanctum')->group(function () {
     )->name('challenge-user.attempt');
 
     Route::get('/user/metrics', [UserController::class, 'getUserMetrics'])->name('user.metrics');
-    
+
+    Route::get('challenge/recommendations', [ChallengeController::class, 'getChallengeRecommendations'])->name('challenge.recommendations');
 });

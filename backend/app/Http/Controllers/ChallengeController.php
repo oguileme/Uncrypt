@@ -109,5 +109,22 @@ class ChallengeController extends Controller
         return response()->json(null, 204);
     }
 
+    public function getChallengeRecommendations()
+    {
+        $user = auth()->user();
+
+        $completedChallenges = $user->challenges()
+            ->wherePivot('completed', true)
+            ->pluck('challenge.id')
+            ->toArray();
+
+        $recommended = Challenge::with('typeEncryption')
+            ->whereNotIn('id', $completedChallenges)
+            ->get()
+            ->map(fn (Challenge $c) => $this->withCiphertext($c)->makeHidden('phrase'));
+
+        return response()->json($recommended);
+    }
+
 
 }
