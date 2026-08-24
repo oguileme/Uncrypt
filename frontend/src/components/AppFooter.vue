@@ -6,7 +6,7 @@
         <span class="footer-copy">&copy; 2026 Uncrypt. Todos os direitos reservados.</span>
       </div>
       <div class="footer-links">
-        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/oguileme/Uncrypt" target="_blank" rel="noopener">GitHub</a>
         <a href="#">Termos</a>
         <a href="#">Privacidade</a>
       </div>
