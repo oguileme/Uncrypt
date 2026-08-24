@@ -6,6 +6,11 @@ export async function getChallenges(): Promise<ChallengeType[]> {
   return response.data
 }
 
+export async function getRecommendedChallenges(): Promise<ChallengeType[]> {
+  const response = await api.get('/challenge/recommendations')
+  return response.data
+}
+
 export async function getChallengeById(id: number): Promise<ChallengeType> {
   const response = await api.get(`/challenges/${id}`)
   return response.data

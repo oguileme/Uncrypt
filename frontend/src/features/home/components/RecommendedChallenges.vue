@@ -1,33 +1,54 @@
 <script setup lang="ts">
-const challenges = [
-  {
-    id: 2,
-    type: 'Cifra de César',
-    typeColor: 'green',
-    difficulty: 1,
-    title: 'O Clássico',
-    description: 'Cada letra foi deslocada no alfabeto por um número fixo.',
-  },
-  {
-    id: 5,
-    type: 'Vigenère',
-    typeColor: 'purple',
-    difficulty: 3,
-    title: 'O Inquebrável',
-    description: 'Uma palavra-chave aplica deslocamentos diferentes em cada letra.',
-  },
-  {
-    id: 3,
-    type: 'Morse',
-    typeColor: 'yellow',
-    difficulty: 2,
-    title: 'O Telégrafo',
-    description: 'Pontos e traços formam uma mensagem de mais de 100 anos.',
-  },
-]
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getRecommendedChallenges } from '@/features/challenge/services/servicesChallenge'
+import { createChallengeUser } from '@/features/challenge/services/serviceChallengeUser'
+import type { ChallengeType } from '@/features/challenge/types/typeChallenge'
+import { getTypeColor, difficultyToStars } from '@/features/challenge/utils/cipherStyles'
 
-function getStars(difficulty: number) {
-  return Array.from({ length: 5 }, (_, i) => i < difficulty)
+const router = useRouter()
+
+const MAX_SHOWN = 3
+
+const recommendations = ref<ChallengeType[]>([])
+const loading = ref(true)
+const startingId = ref<number | null>(null)
+const error = ref<string | null>(null)
+
+const visible = computed(() => recommendations.value.slice(0, MAX_SHOWN))
+const hiddenCount = computed(() => Math.max(0, recommendations.value.length - MAX_SHOWN))
+
+onMounted(async () => {
+  try {
+    recommendations.value = await getRecommendedChallenges()
+  } catch {
+    error.value = 'Nao foi possivel carregar as recomendacoes.'
+  } finally {
+    loading.value = false
+  }
+})
+
+async function start(c: ChallengeType) {
+  if (startingId.value !== null) return
+  startingId.value = c.id
+  try {
+    const record = await createChallengeUser({ challenge_id: c.id })
+    router.push({ name: 'challenge-detail', params: { id: String(record.id) } })
+  } catch {
+    error.value = 'Nao foi possivel iniciar o desafio.'
+    startingId.value = null
+  }
+}
+
+function getBadgeClass(name?: string) {
+  return `type-badge type-${getTypeColor(name ?? '')}`
+}
+
+function getStars(c: ChallengeType) {
+  return Array.from(
+    { length: 5 },
+    (_, i) => i < difficultyToStars(c.type_encryption?.difficulty ?? 'easy'),
+  )
 }
 </script>
 
@@ -35,21 +56,35 @@ function getStars(difficulty: number) {
   <div class="recommended">
     <div class="section-header">
       <h2 class="section-title">Desafios Recomendados</h2>
-      <span class="section-badge">{{ challenges.length }}</span>
+      <span v-if="!loading && !error" class="section-badge">{{ recommendations.length }}</span>
     </div>
 
-    <div class="challenge-list">
-      <RouterLink
-        v-for="c in challenges"
+    <div v-if="loading" class="state-box">Carregando recomendacoes...</div>
+
+    <div v-else-if="error" class="feedback-wrong state-box">{{ error }}</div>
+
+    <div v-else-if="recommendations.length === 0" class="state-box">
+      Voce concluiu todos os desafios disponiveis. Aguarde novas cifras!
+    </div>
+
+    <div v-else class="challenge-list">
+      <button
+        v-for="c in visible"
         :key="c.id"
-        to="/challenge"
         class="recommended-item"
+        :disabled="startingId !== null"
+        @click="start(c)"
       >
         <div class="recommended-top">
-          <span :class="['type-badge', `type-${c.typeColor}`]">{{ c.type }}</span>
+          <div class="recommended-badges">
+            <span :class="getBadgeClass(c.type_encryption?.name)">
+              {{ c.type_encryption?.name }}
+            </span>
+            <span class="recommended-xp">{{ c.xp }} XP</span>
+          </div>
           <div class="recommended-stars">
             <svg
-              v-for="(filled, i) in getStars(c.difficulty)"
+              v-for="(filled, i) in getStars(c)"
               :key="i"
               width="12"
               height="12"
@@ -67,11 +102,20 @@ function getStars(difficulty: number) {
         <p class="recommended-desc">{{ c.description }}</p>
 
         <div class="recommended-bottom">
-          <span class="btn-start">Iniciar</span>
+          <span class="btn-start">
+            {{ startingId === c.id ? 'Iniciando...' : 'Iniciar' }}
+          </span>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M6 4l4 4-4 4" />
           </svg>
         </div>
+      </button>
+
+      <RouterLink v-if="hiddenCount > 0" to="/challenge" class="see-all">
+        Ver todos os {{ recommendations.length }} desafios
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 4l4 4-4 4" />
+        </svg>
       </RouterLink>
     </div>
   </div>
@@ -108,6 +152,13 @@ function getStars(difficulty: number) {
   font-family: var(--font-mono);
 }
 
+.state-box {
+  padding: 32px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 .challenge-list {
   display: flex;
   flex-direction: column;
@@ -119,23 +170,40 @@ function getStars(difficulty: number) {
   gap: 8px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-muted);
-  text-decoration: none;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+  cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.recommended-item:last-child {
+.recommended-item:last-of-type {
   border-bottom: none;
 }
 
-.recommended-item:hover {
+.recommended-item:hover:not(:disabled) {
   background: var(--bg-emphasis);
-  text-decoration: none;
+}
+
+.recommended-item:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .recommended-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.recommended-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .type-badge {
@@ -162,6 +230,13 @@ function getStars(difficulty: number) {
 .type-purple {
   background: var(--accent-purple-muted);
   color: var(--accent-purple);
+}
+
+.recommended-xp {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-yellow);
+  font-family: var(--font-mono);
 }
 
 .recommended-stars {
@@ -195,12 +270,31 @@ function getStars(difficulty: number) {
   transition: color 0.15s ease;
 }
 
-.recommended-item:hover .btn-start {
+.recommended-item:hover:not(:disabled) .btn-start {
   color: #58a6ff;
 }
 
-.recommended-item:hover svg {
+.recommended-item:hover:not(:disabled) svg {
   transform: translateX(2px);
   transition: transform 0.15s ease;
+}
+
+.see-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-muted);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.see-all:hover {
+  background: var(--bg-emphasis);
+  color: var(--accent-blue);
 }
 </style>
