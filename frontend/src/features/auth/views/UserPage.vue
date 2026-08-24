@@ -1,18 +1,30 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getMe } from '@/features/home/services/userService'
+import { useAuth } from '@/features/auth/composables/useAuth'
 import type { UserType } from '../type/userType'
 
-const user: UserType = {
-  id: 7,
-  name: 'Guilherme Rocha',
-  username: 'guilherme',
-  email: 'guilherme@uncrypt.dev',
-  level: 4,
-  xp_progress: 145,
-  xp_levelup: 300,
-  created_at: '2026-03-12T14:32:00.000000Z',
-}
+const { user: authUser } = useAuth()
 
+const user = ref<UserType | null>(null)
+const loading = ref(true)
+const error = ref(false)
+
+onMounted(async () => {
+  try {
+    user.value = await getMe()
+  } catch {
+    if (authUser.value) {
+      user.value = authUser.value
+    } else {
+      error.value = true
+    }
+  } finally {
+    loading.value = false
+  }
+})
+
+// ESTÁTICO: conquistas mockadas, ainda sem endpoint no backend
 interface Achievement {
   id: number
   title: string
@@ -77,22 +89,21 @@ const unlockedCount = computed(() => achievements.filter((a) => a.unlocked).leng
 const emailVisible = ref(false)
 
 const initials = computed(() => {
-  const parts = user.name.trim().split(/\s+/)
-  const first = parts.at(0)?.charAt(0) ?? ''
+  const name = user.value?.name ?? ''
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return ''
+  const first = parts[0]?.charAt(0) ?? ''
   const last = parts.length > 1 ? (parts.at(-1)?.charAt(0) ?? '') : ''
   return (first + last).toUpperCase()
 })
 
-const rankLabel = computed(() => {
-  const l = user.level
-  if (l <= 2) return 'Iniciante'
-  if (l <= 4) return 'Criptógrafo Júnior'
-  if (l <= 6) return 'Criptógrafo Pleno'
-  return 'Criptógrafo Sênior'
-})
+// ESTÁTICO: título fixo "Criptógrafo Júnior", não deriva do nível do usuário
+const rankLabel = 'Criptógrafo Júnior'
 
 const memberSince = computed(() => {
-  const date = new Date(user.created_at).toLocaleDateString('pt-BR', {
+  const createdAt = user.value?.created_at
+  if (!createdAt) return ''
+  const date = new Date(createdAt).toLocaleDateString('pt-BR', {
     month: 'long',
     year: 'numeric',
   })
@@ -105,23 +116,35 @@ function maskPart(part?: string): string {
 }
 
 const displayedEmail = computed(() => {
-  if (emailVisible.value) return user.email
-  const [local, domain] = user.email.split('@')
-  if (!local || !domain) return user.email
+  const email = user.value?.email ?? ''
+  if (!email) return ''
+  if (emailVisible.value) return email
+  const [local, domain] = email.split('@')
+  if (!local || !domain) return email
   const [dom, tld] = domain.split('.')
   return `${maskPart(local)}@${maskPart(dom)}${tld ? `.${tld}` : ''}`
 })
 
-const xpPercent = computed(() =>
-  Math.min(100, Math.round((user.xp_progress / user.xp_levelup) * 100)),
-)
+const xpPercent = computed(() => {
+  const { xp_progress: progress, xp_levelup: levelup } = user.value ?? {}
+  if (progress == null || !levelup) return 0
+  return Math.min(100, Math.round((progress / levelup) * 100))
+})
 
-const xpRemaining = computed(() => Math.max(0, user.xp_levelup - user.xp_progress))
+const xpRemaining = computed(() => {
+  const { xp_progress: progress, xp_levelup: levelup } = user.value ?? {}
+  if (progress == null || levelup == null) return null
+  return Math.max(0, levelup - progress)
+})
 </script>
 
 <template>
   <main class="user-page">
-    <div class="user-inner">
+    <div v-if="loading" class="state-box">Carregando perfil...</div>
+
+    <div v-else-if="error" class="state-box">N&atilde;o foi poss&iacute;vel carregar o perfil.</div>
+
+    <div v-else-if="user" class="user-inner">
       <div class="profile-header">
         <div class="avatar-ring">
           <div class="avatar">{{ initials }}</div>
@@ -131,8 +154,9 @@ const xpRemaining = computed(() => Math.max(0, user.xp_levelup - user.xp_progres
           <h1 class="profile-name">{{ user.name }}</h1>
           <span class="profile-username">@{{ user.username }}</span>
           <div class="header-chips">
+            <!-- ESTÁTICO: título fixo, ver rankLabel no script -->
             <span class="chip chip-rank">{{ rankLabel }}</span>
-            <span class="chip">Membro desde {{ memberSince }}</span>
+            <span v-if="memberSince" class="chip">Membro desde {{ memberSince }}</span>
           </div>
         </div>
 
@@ -189,6 +213,7 @@ const xpRemaining = computed(() => Math.max(0, user.xp_levelup - user.xp_progres
               <span class="identity-value">#{{ String(user.id).padStart(3, '0') }}</span>
             </li>
             <li class="identity-row">
+              <!-- ESTÁTICO: status fixo "ativo", sem campo correspondente na API -->
               <span class="identity-key">&gt; status:</span>
               <span class="identity-value value-green">
                 ativo<span class="cursor">_</span>
@@ -204,8 +229,8 @@ const xpRemaining = computed(() => Math.max(0, user.xp_levelup - user.xp_progres
             </div>
             <div class="progress-body">
               <div class="xp-row">
-                <span class="xp-value">{{ user.xp_progress }}</span>
-                <span class="xp-total">/ {{ user.xp_levelup }} XP</span>
+                <span class="xp-value">{{ user.xp_progress ?? '\u2014' }}</span>
+                <span class="xp-total">/ {{ user.xp_levelup ?? '\u2014' }} XP</span>
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: xpPercent + '%' }"></div>
@@ -220,6 +245,7 @@ const xpRemaining = computed(() => Math.max(0, user.xp_levelup - user.xp_progres
             </div>
           </section>
 
+          <!-- ESTÁTICO: seção de conquistas mockadas, ainda sem endpoint no backend -->
           <section class="card achievements-card">
             <div class="section-header">
               <h2 class="section-title">Conquistas</h2>
@@ -285,6 +311,18 @@ const xpRemaining = computed(() => Math.max(0, user.xp_levelup - user.xp_progres
   flex-direction: column;
   gap: 20px;
   animation: fadeIn 0.5s var(--ease-out);
+}
+
+.state-box {
+  max-width: 1280px;
+  margin: 0 auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 32px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 .profile-header {
