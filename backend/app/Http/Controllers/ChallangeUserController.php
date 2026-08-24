@@ -148,6 +148,8 @@ class ChallangeUserController extends Controller
         while($user->xp_progress >= $user->xp_levelup){
             $user->xp_progress -= $user->xp_levelup;
             $user->level += 1;
+            // curva de progressao: o custo do proximo nivel cresce (nivel 2 -> 200 xp, 3 -> 300, ...)
+            $user->xp_levelup = 100 * $user->level;
         }
 
         $user->save();
