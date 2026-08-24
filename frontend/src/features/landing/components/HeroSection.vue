@@ -47,7 +47,7 @@ onMounted(() => {
       </p>
 
       <div class="hero-actions">
-        <RouterLink to="/challenge" class="btn-hero-primary">
+        <RouterLink to="/register" class="btn-hero-primary">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path
               d="M8 0.5L10.3 5.2L15.5 5.9L11.7 9.5L12.6 14.7L8 12.3L3.4 14.7L4.3 9.5L0.5 5.9L5.7 5.2L8 0.5Z"
