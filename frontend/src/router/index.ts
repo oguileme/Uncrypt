@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { useAuth } from '@/features/auth/composables/useAuth'
 
-const publicRoutes = ['landing', 'login', 'register']
+const publicRoutes = ['landing', 'login', 'register', 'not-found']
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,6 +48,12 @@ const router = createRouter({
       path: '/challenge/:id',
       name: 'challenge-detail',
       component: () => import('../features/challenge/views/ChallengeUser.vue'),
+    },
+
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../features/error/views/NotFoundPage.vue'),
     }
   ],
 })
