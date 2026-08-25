@@ -10,6 +10,7 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 
 - **Backend:** Laravel (API REST) + Sanctum (autenticação) + PostgreSQL
 - **Frontend:** Vue 3 + TypeScript + Vite + Vue Router + Axios
+- **Infraestrutura:** Docker Compose (PostgreSQL 16 · PHP 8.4-FPM · Node 22)
 
 ## O que já está funcionando
 
@@ -41,7 +42,6 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 
 ### Infraestrutura
 
-- Containerização com Docker e docker-compose (backend, frontend e banco)
 - Filas de processamento assíncrono (Laravel Queues + Redis)
 - API Gateway com rate limiting e autenticação centralizada
 - Cache com Redis
@@ -49,7 +49,39 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 
 ## Como rodar
 
-### Backend
+### Com Docker (recomendado)
+
+Pré-requisito: [Docker](https://docs.docker.com/get-docker/) com o plugin Compose.
+
+```bash
+cp .env.example .env        # credenciais do banco usadas pelo compose
+docker compose up --build   # primeira execução (ou após mudar Dockerfile/dependências)
+docker compose up           # execuções seguintes
+```
+
+No boot, o backend espera o healthcheck do PostgreSQL e roda migrations + seed automaticamente.
+
+| Serviço    | Endereço                   |
+| ---------- | -------------------------- |
+| Frontend   | http://localhost:5173      |
+| API        | http://localhost:8000/api  |
+| PostgreSQL | localhost:5433 (host)      |
+
+> A porta do Postgres é publicada em `5433` no host para não conflitar com uma instalação local na `5432`. Dentro da rede do compose o banco continua em `5432`.
+
+Comandos úteis:
+
+```bash
+docker compose logs -f backend   # acompanhar logs de um serviço
+docker compose down              # parar tudo (mantém os dados do banco)
+docker compose down -v           # parar e APAGAR os dados do banco
+```
+
+Use `--build` quando alterar `Dockerfile`, `composer.json` ou `package.json`; mudanças de código são refletidas na hora pelos bind mounts (o frontend tem hot reload).
+
+### Sem Docker
+
+#### Backend
 
 ```bash
 cd backend
@@ -60,7 +92,7 @@ php artisan migrate --seed
 php artisan serve           # http://localhost:8000
 ```
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
