@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { logout } from '@/features/auth/services/authService'
 import { useAuth } from '@/features/auth/composables/useAuth'
 
 const router = useRouter()
-const { clearAuth, isLoggedIn } = useAuth()
+const { clearAuth, isLoggedIn, user } = useAuth()
+
+const userInitials = computed(() => {
+  const name = user.value?.name?.trim()
+  if (!name) return '?'
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase()
+})
 
 const menuOpen = ref(false)
 const route = useRoute()
@@ -84,8 +95,8 @@ onUnmounted(() => {
           <template v-if="isLoggedIn">
             <div class="user-menu" ref="dropdownRef">
               <button class="user-trigger" @click.stop="toggleDropdown">
-                <div class="user-avatar">GR</div>
-                <span class="user-name">Guilherme</span>
+                <div class="user-avatar">{{ userInitials }}</div>
+                <span class="user-name">{{ user?.name ?? 'Usuário' }}</span>
                 <svg
                   width="12"
                   height="12"
