@@ -85,12 +85,33 @@ class CipherHelper
         return trim($result);
     }
 
+    public static function vigenereEncrypt(String $text, String $key){
+        $result = '';
+        $keyLength = strlen($key);
+        $keyIndex = 0;
+        foreach(str_split(strtoupper($text)) as $char){
+            if(ctype_alpha($char)){
+                $shift = ord(strtoupper($key[$keyIndex % $keyLength])) - 65;
+                $result .= self::CesarEncrypt($char, $shift);
+                $keyIndex++;
+            }else{
+                $result .= $char;
+            }
+        }
+        return $result;
+    }
+
+
+
     // aplica a cifra correspondente ao tipo de criptografia cadastrado no banco
     public static function encryptByTypeName(String $typeName, String $text, ?String $key = null): String{
         return match($typeName){
             'Cifra de Cesar' => self::CesarEncrypt($text, $key ?? '3'),
             'ROT13' => self::ROT13Encrypt($text),
             'Base64' => self::base64Encrypt($text),
+            'Atbash' => self::atbashEncrypt($text),
+            'Morse' => self::morseEncrypt($text),
+            'Vigenère' => self::vigenereEncrypt($text, $key ?? 'KEY'),
             default => $text,
         };
     }
