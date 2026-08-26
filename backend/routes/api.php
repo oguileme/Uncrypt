@@ -6,20 +6,19 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\TypeEncryptonController;
 use App\Http\Controllers\ChallangeUserController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::resource('users', UserController::class);
-
 Route::resource('/type-encryption', TypeEncryptonController::class);
 
-Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::resource('/challenges', ChallengeController::class);
 
