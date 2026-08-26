@@ -43,6 +43,15 @@ class CipherHelper
         return base64_decode($text);
     }
 
+    public static function atbashEncrypt(String $text){
+        return strtr($text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 'ZYXWVUTSRQPONMLKJIHGFEDCBAzyxwvutsrqponmlkjihgfedcba');
+    }
+    
+    public static function atbashDecrypt(String $text){
+        return self::atbashEncrypt($text);
+    }
+
+
     // aplica a cifra correspondente ao tipo de criptografia cadastrado no banco
     public static function encryptByTypeName(String $typeName, String $text, ?String $key = null): String{
         return match($typeName){
