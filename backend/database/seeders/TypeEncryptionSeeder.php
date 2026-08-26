@@ -31,6 +31,21 @@ class TypeEncryptionSeeder extends Seeder
                 'description' => 'Tecnicamente nao e criptografia - e uma codificacao que transforma dados binarios em texto ASCII. Pode ser revertida sem nenhuma chave.',
                 'difficulty' => 'medium',
             ],
+            [
+                'name' => 'Atbash',
+                'description' => 'Cada letra e substituida pela sua simetrica no alfabeto: A vira Z, B vira Y, e assim por diante. Nao precisa de chave.',
+                'difficulty' => 'easy',
+            ],
+            [
+                'name' => 'Morse',
+                'description' => 'Sistema de telegrafia baseado em pontos e tracos. Cada letra do alfabeto e representada por uma unica sequencia de sinais.',
+                'difficulty' => 'medium',
+            ],
+            [
+                'name' => 'Vigenère',
+                'description' => 'Cada letra do texto e deslocada pela quantidade indicada pela letra correspondente de uma palavra-chave repetida. Quanto mais longa a chave, mais segura a cifra.',
+                'difficulty' => 'hard',
+            ],
         ];
 
         foreach ($types as $type) {

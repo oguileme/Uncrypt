@@ -101,6 +101,24 @@ class CipherHelper
         return $result;
     }
 
+    public static function vigenereDecrypt(String $text, String $key){
+        $result = '';
+        $keyLength = strlen($key);
+        $keyIndex = 0;
+        foreach(str_split(strtoupper($text)) as $char){
+            if(ctype_alpha($char)){
+                $shift = ord(strtoupper($key[$keyIndex % $keyLength])) - 65;
+                $position = ord($char) - 65;
+                $newPosition = ($position - $shift + 26) % 26;
+                $result .= chr($newPosition + 65);
+                $keyIndex++;
+            }else{
+                $result .= $char;
+            }
+        }
+        return $result;
+    }
+
 
 
     // aplica a cifra correspondente ao tipo de criptografia cadastrado no banco
