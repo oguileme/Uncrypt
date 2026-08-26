@@ -31,6 +31,9 @@ class ChallangeUserController extends Controller
     public function store(Request $request)
     {
         //
+        if(!auth()->check()){
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         $data = $request->validate([
             'challenge_id' => 'required|integer|exists:challenge,id',
         ]);
@@ -55,6 +58,9 @@ class ChallangeUserController extends Controller
     public function show(ChallengeUser $challengeUser)
     {
         //
+        if(auth()->id() !== $challengeUser->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         return response()->json($this->withCiphertext($challengeUser), 200);
     }
 
@@ -84,6 +90,9 @@ class ChallangeUserController extends Controller
     public function update(Request $request, ChallengeUser $challengeUser)
     {
         //
+        if(auth()->id() !== $challengeUser->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         $data = $request->validate([
             'hint_used' => 'sometimes|boolean',
         ]);
