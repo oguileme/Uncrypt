@@ -12,13 +12,20 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::resource('/type-encryption', TypeEncryptonController::class);
+// leitura dos tipos de cifra e publica (usada na landing e na listagem)
+Route::get('/type-encryption', [TypeEncryptonController::class, 'index']);
+Route::get('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 'show']);
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
+    // mutacoes dos tipos de cifra exigem autenticacao e rate limit
+    Route::post('/type-encryption', [TypeEncryptonController::class, 'store'])->middleware('throttle:writes');
+    Route::put('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 'update'])->middleware('throttle:writes');
+    Route::delete('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 'destroy'])->middleware('throttle:writes');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('throttle:writes');
 
     Route::resource('/challenges', ChallengeController::class);
 
@@ -27,9 +34,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/challenge-users/{challengeUser}/attempt',
         [ChallangeUserController::class, 'attempt']
-    )->name('challenge-user.attempt');
+    )->middleware('throttle:attempts')->name('challenge-user.attempt');
 
     Route::get('/user/metrics', [UserController::class, 'getUserMetrics'])->name('user.metrics');
+
+    Route::get('/user/recent-activity', [UserController::class, 'getRecentActivity'])->name('user.recent-activity');
 
     Route::get('challenge/recommendations', [ChallengeController::class, 'getChallengeRecommendations'])->name('challenge.recommendations');
 });
