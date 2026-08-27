@@ -101,6 +101,9 @@ class ChallangeUserController extends Controller
     public function destroy(ChallengeUser $challengeUser)
     {
         //
+        if(auth()->id() !== $challengeUser->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         $challengeUser->delete();
         return response()->json(null, 204);
     }
