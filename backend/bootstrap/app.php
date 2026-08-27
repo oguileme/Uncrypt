@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // API pura: convidados nao devem ser redirecionados para uma rota 'login' web
         // (que nao existe); o AuthenticationException vira 401 JSON.
         $middleware->redirectGuestsTo(fn () => null);
+
+        // adiciona headers de seguranca HTTP em todas as respostas
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

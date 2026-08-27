@@ -23,5 +23,15 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('register', function (Request $request) {
             return Limit::perMinute(3)->by($request->ip());
         });
+
+        // limitam tentativas de resolver um desafio (forca bruta), chaveadas por usuario
+        RateLimiter::for('attempts', function (Request $request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?? $request->ip());
+        });
+
+        // limitam operacoes de escrita em recursos compartilhados
+        RateLimiter::for('writes', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
+        });
     }
 }

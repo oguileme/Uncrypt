@@ -1,36 +1,19 @@
 <script setup lang="ts">
-const activities = [
-  {
-    id: 1,
-    challenge: 'ROT13 — A Porta de Entrada',
-    result: 'correct',
-    time: 'Há 2 horas',
-  },
-  {
-    id: 2,
-    challenge: 'Morse — O Telégrafo',
-    result: 'wrong',
-    time: 'Há 5 horas',
-  },
-  {
-    id: 3,
-    challenge: 'Caesar — O Clássico',
-    result: 'correct',
-    time: 'Ontem',
-  },
-  {
-    id: 4,
-    challenge: 'Base64 — O Impostor',
-    result: 'correct',
-    time: 'Ontem',
-  },
-  {
-    id: 5,
-    challenge: 'Vigenère — O Inquebrável',
-    result: 'wrong',
-    time: '2 dias atrás',
-  },
-]
+import { ref, onMounted } from 'vue'
+import { getRecentActivity, type RecentActivityType } from '../services/userService'
+
+const activities = ref<RecentActivityType[]>([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    activities.value = await getRecentActivity()
+  } catch {
+    activities.value = []
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -39,7 +22,13 @@ const activities = [
       <h2 class="section-title">Atividade Recente</h2>
     </div>
 
-    <div class="activity-list">
+    <div v-if="loading" class="activity-empty">Carregando...</div>
+
+    <div v-else-if="activities.length === 0" class="activity-empty">
+      Nenhuma atividade ainda. Complete um desafio para aparecer aqui.
+    </div>
+
+    <div v-else class="activity-list">
       <div v-for="(a, index) in activities" :key="a.id" class="activity-item">
         <div class="activity-line">
           <div
@@ -103,6 +92,13 @@ const activities = [
 
 .activity-list {
   padding: 8px 0;
+}
+
+.activity-empty {
+  padding: 24px 20px;
+  font-size: 13px;
+  color: var(--text-subtle);
+  text-align: center;
 }
 
 .activity-item {

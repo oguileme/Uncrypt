@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ChallengeUser;
-use App\Helpers\CipherHelper;
 
 class ChallangeUserController extends Controller
 {
@@ -66,14 +65,8 @@ class ChallangeUserController extends Controller
 
     private function withCiphertext(ChallengeUser $challengeUser): ChallengeUser
     {
-        $challenge = $challengeUser->challenge->load('typeEncryption');
-        $challenge->ciphertext = CipherHelper::encryptByTypeName(
-            $challenge->typeEncryption->name,
-            $challenge->phrase,
-            $challenge->key
-        );
-
-        return $challengeUser->setRelation('challenge', $challenge->makeHidden('phrase'));
+        $challenge = $challengeUser->challenge->withCiphertext()->makeHidden('phrase');
+        return $challengeUser->setRelation('challenge', $challenge);
     }
 
     /**
@@ -108,6 +101,9 @@ class ChallangeUserController extends Controller
     public function destroy(ChallengeUser $challengeUser)
     {
         //
+        if(auth()->id() !== $challengeUser->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         $challengeUser->delete();
         return response()->json(null, 204);
     }
