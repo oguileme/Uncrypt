@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ChallengeUser;
 
 class UserController extends Controller
 {
@@ -99,5 +100,34 @@ class UserController extends Controller
         ];
 
         return response()->json($metrics);
+    }
+
+    /**
+     * Retorna as ultimas atividades do usuario logado em challenge_user.
+     */
+    public function getRecentActivity(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // limite padrao 5, aceita ate 20 para evitar payloads pesados
+        $limit = max(1, min((int) $request->integer('limit', 5), 20));
+
+        $activities = ChallengeUser::where('user_id', auth()->id())
+            ->where('attempts', '>', 0)
+            ->with('challenge:id,title')
+            ->latest()
+            ->limit($limit)
+            ->get()
+            ->map(fn ($cu) => [
+                'id'        => $cu->id,
+                'challenge' => $cu->challenge?->title ?? 'Desafio excluído',
+                'result'    => $cu->completed ? 'correct' : 'wrong',
+                'time'      => $cu->created_at->locale('pt_BR')->diffForHumans(),
+                'attempts'  => $cu->attempts,
+            ]);
+
+        return response()->json($activities);
     }
 }
