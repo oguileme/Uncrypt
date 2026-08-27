@@ -3,25 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Challenge;
-use App\Helpers\CipherHelper;
 use Illuminate\Http\Request;
 use Throwable;
 
 class ChallengeController extends Controller
 {
-    // anexa o texto cifrado (gerado pelo CipherHelper) e esconde a resposta original
-    private function withCiphertext(Challenge $challenge): Challenge
-    {
-        $challenge->load('typeEncryption');
-        $challenge->ciphertext = CipherHelper::encryptByTypeName(
-            $challenge->typeEncryption->name,
-            $challenge->phrase,
-            $challenge->key
-        );
-
-        return $challenge;
-    }
-
     /**
      * Display a listing of the resource.
      */
@@ -31,7 +17,7 @@ class ChallengeController extends Controller
         return response()->json(
             Challenge::with('typeEncryption')
                 ->get()
-                ->map(fn (Challenge $c) => $this->withCiphertext($c)->makeHidden('phrase'))
+                ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'))
         );
     }
 
@@ -69,7 +55,7 @@ class ChallengeController extends Controller
     public function show(Challenge $challenge)
     {
         //
-        return response()->json($this->withCiphertext($challenge)->makeHidden('phrase'));
+        return response()->json($challenge->withCiphertext()->makeHidden('phrase'));
     }
 
     /**
@@ -121,7 +107,7 @@ class ChallengeController extends Controller
         $recommended = Challenge::with('typeEncryption')
             ->whereNotIn('id', $completedChallenges)
             ->get()
-            ->map(fn (Challenge $c) => $this->withCiphertext($c)->makeHidden('phrase'));
+            ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'));
 
         return response()->json($recommended);
     }

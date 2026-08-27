@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\CipherHelper;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -23,5 +24,18 @@ class Challenge extends Model
     public function typeEncryption()
     {
         return $this->belongsTo(TypeEncrypton::class);
+    }
+
+    // anexa o texto cifrado (gerado pelo CipherHelper) ao desafio, escondendo a resposta original
+    public function withCiphertext(): self
+    {
+        $this->load('typeEncryption');
+        $this->ciphertext = CipherHelper::encryptByTypeName(
+            $this->typeEncryption->name,
+            $this->phrase,
+            $this->key
+        );
+
+        return $this;
     }
 }

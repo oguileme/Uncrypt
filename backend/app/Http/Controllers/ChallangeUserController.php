@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ChallengeUser;
-use App\Helpers\CipherHelper;
 
 class ChallangeUserController extends Controller
 {
@@ -66,14 +65,8 @@ class ChallangeUserController extends Controller
 
     private function withCiphertext(ChallengeUser $challengeUser): ChallengeUser
     {
-        $challenge = $challengeUser->challenge->load('typeEncryption');
-        $challenge->ciphertext = CipherHelper::encryptByTypeName(
-            $challenge->typeEncryption->name,
-            $challenge->phrase,
-            $challenge->key
-        );
-
-        return $challengeUser->setRelation('challenge', $challenge->makeHidden('phrase'));
+        $challenge = $challengeUser->challenge->withCiphertext()->makeHidden('phrase');
+        return $challengeUser->setRelation('challenge', $challenge);
     }
 
     /**
