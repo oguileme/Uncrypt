@@ -7,10 +7,18 @@ use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\TypeEncryptonController;
 use App\Http\Controllers\ChallangeUserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\AchievementUserController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::resource('/achievement', AchievementController::class);
+Route::resource('/achievement', AchievementUserController::class);
+
+
+
 
 // leitura dos tipos de cifra e publica (usada na landing e na listagem)
 Route::get('/type-encryption', [TypeEncryptonController::class, 'index']);
