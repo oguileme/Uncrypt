@@ -131,12 +131,18 @@ class ChallangeUserController extends Controller
             // abs + cast: diffInSeconds pode vir negativo/decimal e a coluna e integer
             $timeTaken = (int) abs(now()->diffInSeconds($challengeUser->created_at));
             $challengeUser->update(['completed' => true, 'time_taken' => $timeTaken]);
-            $xpGained = $this->awardXp($challengeUser->challenge->xp);
+
+            // usar dica reduz o XP pela metade (arredondado para baixo)
+            $baseXp = $challengeUser->challenge->xp;
+            $halved = $challengeUser->hint_used;
+            $xpGained = $this->awardXp($halved ? (int) floor($baseXp / 2) : $baseXp);
 
             return response()->json([
                 'message' => 'Challenge completed!',
                 'completed' => true,
                 'xp_gained' => $xpGained,
+                'xp_full' => $baseXp,
+                'hint_used' => $halved,
                 'time_taken' => $timeTaken,
                 'challenge_user' => $this->withCiphertext($challengeUser->fresh()),
             ], 200);
