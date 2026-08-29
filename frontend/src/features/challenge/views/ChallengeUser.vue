@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { getChallengeUserById, attemptChallengeUser, setHintUsed } from '../services/serviceChallengeUser'
 import type { AttemptResponse } from '../services/serviceChallengeUser'
@@ -17,6 +17,8 @@ const feedback = ref<'correct' | 'wrong' | null>(null)
 const hintOpen = ref(false)
 const checking = ref(false)
 const xpGained = ref<number | null>(null)
+const hintReduced = ref(false)
+const hintConfirmOpen = ref(false)
 let hintMarked = false
 
 const activeChallenge = computed(() => record.value?.challenge ?? null)
@@ -26,6 +28,9 @@ const stars = computed(() =>
 )
 const attempts = computed(() => record.value?.attempts ?? 0)
 const isCompleted = computed(() => record.value?.completed ?? false)
+const hintUsed = computed(() => record.value?.hint_used ?? false)
+const baseXpPreview = computed(() => activeChallenge.value?.xp ?? 0)
+const reducedXpPreview = computed(() => Math.floor(baseXpPreview.value / 2))
 
 function getTypeBadgeClass(color: string) {
   return `type-badge type-${color}`
@@ -57,6 +62,7 @@ async function checkAnswer() {
 
   if (response.completed) {
     xpGained.value = response.xp_gained ?? null
+    hintReduced.value = response.hint_used ?? record.value?.hint_used ?? false
     if (response.challenge_user) {
       record.value = { ...record.value, ...response.challenge_user }
     } else {
@@ -71,12 +77,47 @@ async function checkAnswer() {
 }
 
 function toggleHint() {
+  if (!hintOpen.value && record.value && !record.value.hint_used) {
+    hintConfirmOpen.value = true
+    return
+  }
   hintOpen.value = !hintOpen.value
-  if (hintOpen.value && !hintMarked && record.value && !record.value.hint_used) {
+}
+
+function confirmHint() {
+  hintConfirmOpen.value = false
+  hintOpen.value = true
+  if (!hintMarked && record.value) {
     hintMarked = true
     setHintUsed(record.value.id).catch(() => {})
   }
 }
+
+function cancelHint() {
+  hintConfirmOpen.value = false
+  hintOpen.value = false
+}
+
+const confirmBtnRef = ref<HTMLButtonElement | null>(null)
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && hintConfirmOpen.value) {
+    cancelHint()
+  }
+}
+
+watch(hintConfirmOpen, async (open) => {
+  if (open) await nextTick()
+  if (open) confirmBtnRef.value?.focus()
+})
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <template>
@@ -158,7 +199,9 @@ function toggleHint() {
             />
           </svg>
           Correto! Voce decifrou a mensagem em {{ attempts }} tentativa{{ attempts > 1 ? 's' : '' }}.
-          <span v-if="xpGained">+{{ xpGained }} XP</span>
+          <span v-if="xpGained">
+            +{{ xpGained }} XP<span v-if="hintReduced || hintUsed"> (metade - dica usada)</span>
+          </span>
         </div>
 
         <div v-else-if="feedback === 'wrong'" class="feedback feedback-wrong">
@@ -204,6 +247,60 @@ function toggleHint() {
         </div>
       </div>
     </section>
+
+    <Transition name="modal">
+      <div
+        v-if="hintConfirmOpen"
+        class="dialog-overlay"
+        @click.self="cancelHint"
+      >
+        <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="hint-dialog-title">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <span class="terminal-title">dica_detectada.desclog</span>
+          </div>
+
+          <div class="dialog-body">
+            <div class="terminal-line">
+              <span class="terminal-prompt">$</span>
+              <span class="terminal-text">crypto --audit dica</span>
+            </div>
+            <h2 id="hint-dialog-title" class="dialog-title">
+              Aviso de despacho confidencial
+            </h2>
+            <p class="dialog-desc">
+              Usar a dica reduz o XP desta miss&atilde;o pela metade. Voc&ecirc; ainda
+              pode decifrar, mas a recompensa ser&aacute; menor.
+            </p>
+
+            <div class="dialog-xp">
+              <div class="xp-row">
+                <span class="xp-label">XP sem dica</span>
+                <span class="xp-amount">{{ baseXpPreview }}</span>
+              </div>
+              <div class="xp-row xp-reduced">
+                <span class="xp-label">XP com dica</span>
+                <span class="xp-amount">{{ reducedXpPreview }}</span>
+              </div>
+            </div>
+
+            <div class="dialog-actions">
+              <button class="btn-cancel" @click="cancelHint">
+                Continuar sem dica
+              </button>
+              <button class="btn-confirm" @click="confirmHint" ref="confirmBtnRef">
+                Usar dica
+                <span class="btn-xp">&middot; -50% XP</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </main>
 </template>
 
@@ -502,6 +599,159 @@ function toggleHint() {
   border-top: 1px solid var(--border-muted);
   background: var(--bg-canvas);
   animation: fadeIn 0.2s var(--ease-out);
+}
+
+/* Confirmação de dica (modal de despacho) */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(1, 4, 9, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.dialog-card {
+  width: 100%;
+  max-width: 460px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-inset);
+  box-shadow: var(--shadow-float);
+}
+
+.dialog-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialog-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+.dialog-desc {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.dialog-xp {
+  margin-top: 4px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.xp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-surface);
+}
+
+.xp-row + .xp-row {
+  border-top: 1px solid var(--border-muted);
+}
+
+.xp-row.xp-reduced {
+  background: var(--accent-yellow-muted);
+}
+
+.xp-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.xp-amount {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.xp-reduced .xp-amount {
+  color: var(--accent-yellow);
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-cancel,
+.btn-confirm {
+  flex: 1;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-cancel {
+  color: var(--text-primary);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.btn-cancel:hover {
+  background: var(--bg-emphasis);
+  border-color: var(--border-emphasis);
+}
+
+.btn-confirm {
+  color: var(--text-on-emphasis);
+  background: var(--accent-green-dark);
+  border-color: rgba(63, 185, 80, 0.4);
+}
+
+.btn-confirm:hover {
+  background: #2ea043;
+}
+
+.btn-confirm:focus-visible,
+.btn-cancel:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-success);
+}
+
+.btn-xp {
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.2s var(--ease-out);
+}
+
+.modal-enter-active .dialog-card,
+.modal-leave-active .dialog-card {
+  transition: transform 0.2s var(--ease-out);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .dialog-card,
+.modal-leave-to .dialog-card {
+  transform: translateY(12px) scale(0.98);
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,88 @@
+import type { Achievement, AchievementProgressUser } from '../types/typeAchievement'
+
+export const mockAchievements: Achievement[] = [
+  {
+    id: 1,
+    name: 'Primeira Chave',
+    description:
+      'Decifre sua primeira mensagem e absorva a essência da criptografia clássica.',
+    xp_reward: 50,
+    required_count: 1,
+    icon: 'key',
+    color: 'green',
+  },
+  {
+    id: 2,
+    name: 'Rotor em Movimento',
+    description: 'Complete 5 desafios usando qualquer cifra para colocar o rotor para girar.',
+    xp_reward: 100,
+    required_count: 5,
+    icon: 'rotor',
+    color: 'blue',
+  },
+  {
+    id: 3,
+    name: 'Engenho de Precisão',
+    description: 'Acerte 10 mensagens seguidas e afine o mecanismo do seu arsenal.',
+    xp_reward: 150,
+    required_count: 10,
+    icon: 'gear',
+    color: 'orange',
+  },
+  {
+    id: 4,
+    name: 'Transmissor de Morse',
+    description: 'Decifre mensagens em código Morse e sinalize sua habilidade no ar.',
+    xp_reward: 120,
+    required_count: 3,
+    icon: 'wave',
+    color: 'yellow',
+  },
+  {
+    id: 5,
+    name: 'Cofre Intacto',
+    description: 'Resolva um desafio sem recorrer a nenhuma dica e mantenha o cofre lacrado.',
+    xp_reward: 80,
+    required_count: 1,
+    icon: 'lock',
+    color: 'green',
+  },
+  {
+    id: 6,
+    name: 'Estrela do Criptógrafo',
+    description: 'Acumule 500 XP e conquiste sua estrela no alto do arsenal.',
+    xp_reward: 200,
+    required_count: 500,
+    icon: 'star',
+    color: 'purple',
+  },
+  {
+    id: 7,
+    name: 'Colecionador de Cifras',
+    description: 'Domine ao menos 4 tipos diferentes de cifra na sua coleção.',
+    xp_reward: 250,
+    required_count: 4,
+    icon: 'vault',
+    color: 'blue',
+  },
+  {
+    id: 8,
+    name: 'Guardião do Arquivo',
+    description: 'Complete todos os desafios disponíveis e vire o guardião do arquivo secreto.',
+    xp_reward: 500,
+    required_count: 25,
+    icon: 'compass',
+    color: 'yellow',
+  },
+]
+
+export const mockProgress: AchievementProgressUser[] = [
+  { user_id: 1, achievement_id: 1, progress: 1, is_completed: true },
+  { user_id: 1, achievement_id: 2, progress: 3, is_completed: false },
+  { user_id: 1, achievement_id: 3, progress: 2, is_completed: false },
+  { user_id: 1, achievement_id: 4, progress: 0, is_completed: false },
+  { user_id: 1, achievement_id: 5, progress: 1, is_completed: true },
+  { user_id: 1, achievement_id: 6, progress: 340, is_completed: false },
+  { user_id: 1, achievement_id: 7, progress: 1, is_completed: false },
+  { user_id: 1, achievement_id: 8, progress: 0, is_completed: false },
+]

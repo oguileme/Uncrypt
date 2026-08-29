@@ -45,6 +45,12 @@ const router = createRouter({
     },
 
     {
+      path: '/achievements',
+      name: 'achievements',
+      component: () => import('../features/achievement/views/AchievementsPage.vue'),
+    },
+
+    {
       path: '/challenge/:id',
       name: 'challenge-detail',
       component: () => import('../features/challenge/views/ChallengeUser.vue'),
