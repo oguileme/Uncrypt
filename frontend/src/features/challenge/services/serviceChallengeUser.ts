@@ -6,6 +6,8 @@ export interface AttemptResponse {
   message: string
   completed: boolean
   xp_gained?: number
+  xp_full?: number
+  hint_used?: boolean
   time_taken?: number
   challenge_user?: ChallengeUserType
 }
