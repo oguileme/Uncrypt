@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Challenge;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 class ChallengeController extends Controller
@@ -14,11 +15,14 @@ class ChallengeController extends Controller
     public function index()
     {
         //
-        return response()->json(
-            Challenge::with('typeEncryption')
+        $challenges = Cache::remember('challenges.index', 1800, function () {
+            return Challenge::with('typeEncryption')
                 ->get()
                 ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'))
-        );
+                ->values();
+        });
+
+        return response()->json($challenges);
     }
 
     /**
@@ -46,6 +50,9 @@ class ChallengeController extends Controller
             'hint' => 'required|string|max:255',
         ]);
         $challenge = Challenge::create($data);
+
+        Cache::forget('challenges.index');
+
         return response()->json($challenge, 201);
     }
 
@@ -55,7 +62,11 @@ class ChallengeController extends Controller
     public function show(Challenge $challenge)
     {
         //
-        return response()->json($challenge->withCiphertext()->makeHidden('phrase'));
+        $data = Cache::remember("challenges.{$challenge->id}", 1800, function () use ($challenge) {
+            return $challenge->withCiphertext()->makeHidden('phrase');
+        });
+
+        return response()->json($data);
     }
 
     /**
@@ -82,6 +93,10 @@ class ChallengeController extends Controller
             'hint' => 'sometimes|string|max:255',
         ]);
         $challenge->update($data);
+
+        Cache::forget('challenges.index');
+        Cache::forget("challenges.{$challenge->id}");
+
         return response()->json($challenge);
     }
 
@@ -92,6 +107,10 @@ class ChallengeController extends Controller
     {
         //
         $challenge->delete();
+
+        Cache::forget('challenges.index');
+        Cache::forget("challenges.{$challenge->id}");
+
         return response()->json(null, 204);
     }
 
@@ -104,10 +123,16 @@ class ChallengeController extends Controller
             ->pluck('challenge.id')
             ->toArray();
 
-        $recommended = Challenge::with('typeEncryption')
-            ->whereNotIn('id', $completedChallenges)
-            ->get()
-            ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'));
+        $allChallenges = Cache::remember('challenges.index', 1800, function () {
+            return Challenge::with('typeEncryption')
+                ->get()
+                ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'))
+                ->values();
+        });
+
+        $recommended = $allChallenges
+            ->filter(fn ($challenge) => !in_array($challenge->id, $completedChallenges))
+            ->values();
 
         return response()->json($recommended);
     }

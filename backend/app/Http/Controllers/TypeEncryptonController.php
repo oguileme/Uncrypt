@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TypeEncrypton;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TypeEncryptonController extends Controller
 {
@@ -13,7 +14,11 @@ class TypeEncryptonController extends Controller
     public function index()
     {
         //
-        return response()->json(TypeEncrypton::all());
+        $types = Cache::remember('type-encryption.index', 1800, function () {
+            return TypeEncrypton::all();
+        });
+
+        return response()->json($types);
     }
 
     /**
@@ -36,6 +41,10 @@ class TypeEncryptonController extends Controller
             'difficulty' => 'required|in:easy,medium,hard',
         ]);
         $typeEncrypton = TypeEncrypton::create($data);
+
+        Cache::forget('type-encryption.index');
+        Cache::forget('challenges.index');
+
         return response()->json($typeEncrypton, 201);
     }
 
@@ -68,6 +77,10 @@ class TypeEncryptonController extends Controller
             'difficulty' => 'sometimes|in:easy,medium,hard',
         ]);
         $typeEncrypton->update($data);
+
+        Cache::forget('type-encryption.index');
+        Cache::forget('challenges.index');
+
         return response()->json($typeEncrypton);
     }
 
@@ -78,6 +91,10 @@ class TypeEncryptonController extends Controller
     {
         //
         $typeEncrypton->delete();
+
+        Cache::forget('type-encryption.index');
+        Cache::forget('challenges.index');
+
         return response()->json(null, 204);
     }
 }
