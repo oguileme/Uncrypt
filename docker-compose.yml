@@ -30,6 +30,7 @@ services:
       DB_DATABASE: ${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+      SANCTUM_EXPIRATION: ${SANCTUM_EXPIRATION:-10080}
     depends_on:
       db:
         condition: service_healthy
