@@ -38,7 +38,7 @@ class AchievementController extends Controller
             'required_count' => 'required|integer',
         ]);
 
-        $achievement = Achievement::created($data);
+        $achievement = Achievement::create($data);
 
         return response()->json($achievement, 201);
     }

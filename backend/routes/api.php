@@ -15,7 +15,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::resource('/achievement', AchievementController::class);
-Route::resource('/achievement', AchievementUserController::class);
+Route::resource('/achievement-progress', AchievementUserController::class);
 
 
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Achievement extends Model
 {
     //
-    protected $table = 'achivements';
+    protected $table = 'achievements';
 
     protected $fillable = ['name', 'description', 'xp_reward', 'required_count'];
 
