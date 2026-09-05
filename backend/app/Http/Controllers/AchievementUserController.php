@@ -13,7 +13,7 @@ class AchievementUserController extends Controller
     public function index()
     {
         //
-        return response()->json(AchievementUser::all());
+        return response()->json(AchievementUser::where('user_id', auth()->id())->get());
     }
 
     /**
@@ -31,11 +31,13 @@ class AchievementUserController extends Controller
     {
         //
         $data = $request->validate([
-            'user_id' => 'required|integer',
             'achievement_id' => 'required|integer',
         ]);
 
-        $achievementUser = AchievementUser::create($data);
+        $achievementUser = AchievementUser::create([
+            'user_id' => auth()->id(),
+            'achievement_id' => $data['achievement_id'],
+        ]);
         return response()->json($achievementUser,201);
     }
 
@@ -45,6 +47,10 @@ class AchievementUserController extends Controller
     public function show(AchievementUser $achievementUser)
     {
         //
+        if (auth()->id() !== $achievementUser->user_id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         return response()->json($achievementUser);
     }
 
@@ -62,7 +68,18 @@ class AchievementUserController extends Controller
     public function update(Request $request, AchievementUser $achievementUser)
     {
         //
-        
+        if (auth()->id() !== $achievementUser->user_id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $data = $request->validate([
+            'progress' => 'sometimes|nullable|integer|min:0',
+            'is_completed' => 'sometimes|boolean',
+        ]);
+
+        $achievementUser->update($data);
+
+        return response()->json($achievementUser);
     }
 
     /**
@@ -71,6 +88,10 @@ class AchievementUserController extends Controller
     public function destroy(AchievementUser $achievementUser)
     {
         //
+        if (auth()->id() !== $achievementUser->user_id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $achievementUser->delete();
         return response()->json(null,204);
     }
