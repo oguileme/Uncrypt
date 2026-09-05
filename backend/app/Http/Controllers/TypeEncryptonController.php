@@ -15,7 +15,7 @@ class TypeEncryptonController extends Controller
     {
         //
         $types = Cache::remember('type-encryption.index', 1800, function () {
-            return TypeEncrypton::all();
+            return TypeEncrypton::all()->toArray();
         });
 
         return response()->json($types);

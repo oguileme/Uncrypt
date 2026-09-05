@@ -18,8 +18,10 @@ class ChallengeController extends Controller
         $challenges = Cache::remember('challenges.index', 1800, function () {
             return Challenge::with('typeEncryption')
                 ->get()
-                ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'))
-                ->values();
+                ->map(fn (Challenge $c) => $c->withCiphertext())
+                ->makeHidden('phrase')
+                ->values()
+                ->toArray();
         });
 
         return response()->json($challenges);
@@ -63,7 +65,7 @@ class ChallengeController extends Controller
     {
         //
         $data = Cache::remember("challenges.{$challenge->id}", 1800, function () use ($challenge) {
-            return $challenge->withCiphertext()->makeHidden('phrase');
+            return $challenge->withCiphertext()->makeHidden('phrase')->toArray();
         });
 
         return response()->json($data);
@@ -126,12 +128,14 @@ class ChallengeController extends Controller
         $allChallenges = Cache::remember('challenges.index', 1800, function () {
             return Challenge::with('typeEncryption')
                 ->get()
-                ->map(fn (Challenge $c) => $c->withCiphertext()->makeHidden('phrase'))
-                ->values();
+                ->map(fn (Challenge $c) => $c->withCiphertext())
+                ->makeHidden('phrase')
+                ->values()
+                ->toArray();
         });
 
-        $recommended = $allChallenges
-            ->filter(fn ($challenge) => !in_array($challenge->id, $completedChallenges))
+        $recommended = collect($allChallenges)
+            ->filter(fn (array $challenge) => !in_array($challenge['id'], $completedChallenges))
             ->values();
 
         return response()->json($recommended);
