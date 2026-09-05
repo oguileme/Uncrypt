@@ -15,7 +15,7 @@ class TypeEncryptonController extends Controller
     {
         //
         $types = Cache::remember('type-encryption.index', 1800, function () {
-            return TypeEncrypton::all();
+            return TypeEncrypton::all()->toArray();
         });
 
         return response()->json($types);
@@ -77,6 +77,14 @@ class TypeEncryptonController extends Controller
             'difficulty' => 'sometimes|in:easy,medium,hard',
         ]);
         $typeEncrypton->update($data);
+
+        // renomear o tipo invalida o ciphertext materializado dos desafios desse tipo
+        if ($typeEncrypton->wasChanged('name')) {
+            foreach ($typeEncrypton->challenges()->get() as $challenge) {
+                $challenge->computeCiphertext();
+                $challenge->saveQuietly();
+            }
+        }
 
         Cache::forget('type-encryption.index');
         Cache::forget('challenges.index');

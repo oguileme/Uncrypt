@@ -61,12 +61,12 @@ onMounted(() => {
 
       <div class="hero-stats">
         <div class="stat">
-          <span class="stat-number">5</span>
+          <span class="stat-number">6</span>
           <span class="stat-label">Tipos de Cifra</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat">
-          <span class="stat-number">50+</span>
+          <span class="stat-number">30+</span>
           <span class="stat-label">Desafios</span>
         </div>
         <div class="stat-divider"></div>

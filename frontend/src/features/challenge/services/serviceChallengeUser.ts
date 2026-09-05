@@ -34,10 +34,6 @@ export async function updateChallengeUser(id: number, data: Partial<Omit<Challen
   return response.data
 }
 
-export async function deleteChallengeUser(id: number): Promise<void> {
-  await api.delete(`/challenge-users/${id}`)
-}
-
 export async function attemptChallengeUser(id: number, attempt: string): Promise<AttemptResponse> {
     try {
         const response = await api.post(`/challenge-users/${id}/attempt`, { attempt })

@@ -19,6 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // adiciona headers de seguranca HTTP em todas as respostas
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // habilita cache HTTP no browser para rotas GET publicas/estaticas
+        $middleware->alias([
+            'cache.public' => \App\Http\Middleware\HttpCache::class,
+            'admin' => \App\Http\Middleware\AdminOnly::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

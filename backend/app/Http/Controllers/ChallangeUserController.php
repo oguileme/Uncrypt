@@ -13,7 +13,7 @@ class ChallangeUserController extends Controller
     public function index()
     {
         //
-        return response()->json(ChallengeUser::all(), 200);
+        return response()->json(ChallengeUser::where('user_id', auth()->id())->get(), 200);
     }
 
     /**

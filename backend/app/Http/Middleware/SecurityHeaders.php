@@ -19,7 +19,12 @@ class SecurityHeaders
             'Permissions-Policy',
             'geolocation=(), microphone=(), camera=()'
         );
-        $response->headers->set('Cache-Control', 'no-store');
+
+        // default de privacidade: sem cache; rotas publicas que liberam cache
+        // (HttpCache middleware) definem o proprio Cache-Control antes deste
+        if (! $response->headers->has('Cache-Control')) {
+            $response->headers->set('Cache-Control', 'no-store');
+        }
 
         return $response;
     }
