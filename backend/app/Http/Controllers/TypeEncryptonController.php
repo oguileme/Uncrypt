@@ -78,6 +78,14 @@ class TypeEncryptonController extends Controller
         ]);
         $typeEncrypton->update($data);
 
+        // renomear o tipo invalida o ciphertext materializado dos desafios desse tipo
+        if ($typeEncrypton->wasChanged('name')) {
+            foreach ($typeEncrypton->challenges()->get() as $challenge) {
+                $challenge->computeCiphertext();
+                $challenge->saveQuietly();
+            }
+        }
+
         Cache::forget('type-encryption.index');
         Cache::forget('challenges.index');
 
