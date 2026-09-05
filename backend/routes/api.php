@@ -21,8 +21,8 @@ Route::resource('/achievement-progress', AchievementUserController::class);
 
 
 // leitura dos tipos de cifra e publica (usada na landing e na listagem)
-Route::get('/type-encryption', [TypeEncryptonController::class, 'index']);
-Route::get('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 'show']);
+Route::get('/type-encryption', [TypeEncryptonController::class, 'index'])->middleware('cache.public');
+Route::get('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 'show'])->middleware('cache.public');
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -35,7 +35,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('throttle:writes');
 
-    Route::resource('/challenges', ChallengeController::class);
+    Route::resource('/challenges', ChallengeController::class)->except(['index', 'show']);
+
+    // GETs de leitura com cache HTTP no browser (payload identico entre usuarios, escopo private)
+    Route::get('/challenges', [ChallengeController::class, 'index'])->middleware('cache.public:1800,private');
+    Route::get('/challenges/{challenge}', [ChallengeController::class, 'show'])->middleware('cache.public:1800,private');
 
     Route::resource('/challenge-users', ChallangeUserController::class)->only(['index', 'show', 'store', 'update']);
 
