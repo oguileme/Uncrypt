@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminOnly::class,
         ]);
 
+        // reconhece requisicoes do frontend SPA (localhost:5173) via Sanctum,
+        // usando sessao + cookie httpOnly em vez de token no localStorage
+        $middleware->statefulApi();
+
         // considera headers X-Forwarded-* apenas de proxies confiaveis (env);
         // vazio = nenhum proxy, $request->ip() reflete o IP real do cliente
         $middleware->trustProxies(

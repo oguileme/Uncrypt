@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '../services/authService'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const { setAuth } = useAuth()
 
 const name = ref('')
 const username = ref('')
@@ -24,13 +26,15 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    await register({
+    const user = await register({
       name: name.value,
       username: username.value,
       email: email.value,
       password: password.value,
+      password_confirmation: confirmPassword.value,
     })
-    router.push('/login')
+    setAuth(user)
+    router.push('/home')
   } catch (err: any) {
     if (err.response?.status === 422) {
       const errors = err.response.data.errors

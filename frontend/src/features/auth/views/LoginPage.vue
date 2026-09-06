@@ -17,8 +17,8 @@ async function handleSubmit() {
   errorMessage.value = ''
   loading.value = true
   try {
-    const { user, token } = await login({ email: email.value, password: password.value })
-    setAuth(user, token)
+    const { user } = await login({ email: email.value, password: password.value })
+    setAuth(user)
     router.push('/home')
   } catch (err: any) {
     errorMessage.value = err.response?.status === 401

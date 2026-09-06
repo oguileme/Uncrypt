@@ -2,27 +2,23 @@
 import { ref, computed } from 'vue'
 import type { UserType } from '../type/userType'
 
+// a sessao vive em cookie httpOnly; aqui persistimos apenas o user (nao sensivel)
 const user = ref<UserType | null>(
   JSON.parse(localStorage.getItem('user') ?? 'null')
 )
-const token = ref<string | null>(localStorage.getItem('token'))
 
 export function useAuth() {
-  const isLoggedIn = computed(() => !!token.value)
+  const isLoggedIn = computed(() => !!user.value)
 
-  function setAuth(newUser: UserType, newToken: string) {
+  function setAuth(newUser: UserType) {
     user.value = newUser
-    token.value = newToken
     localStorage.setItem('user', JSON.stringify(newUser))
-    localStorage.setItem('token', newToken)
   }
 
   function clearAuth() {
     user.value = null
-    token.value = null
     localStorage.removeItem('user')
-    localStorage.removeItem('token')
   }
 
-  return { user, token, isLoggedIn, setAuth, clearAuth }
+  return { user, isLoggedIn, setAuth, clearAuth }
 }
