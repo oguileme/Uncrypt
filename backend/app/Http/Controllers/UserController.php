@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\User;
 use App\Models\ChallengeUser;
 
@@ -91,13 +92,26 @@ class UserController extends Controller
         if (!auth()->check()) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        $user = auth()->user();
 
-        $metrics = [
-            'challenges_completed' => $user->challengesCompleted(),
-            'accuracy_rate' => round($user->accuracyRate(), 1),
-            'avg_time_per_challenge' => round($user->avgTimePerChallenge()),
-        ];
+        $userId = auth()->id();
+
+        // agregacao em uma unica query + cache curto (invalida no awardXp)
+        $metrics = Cache::remember("user.metrics.{$userId}", 60, function () use ($userId) {
+            $stats = ChallengeUser::query()
+                ->where('user_id', $userId)
+                ->selectRaw('COUNT(*) FILTER (WHERE completed = true) as completed')
+                ->selectRaw('COALESCE(SUM(attempts), 0) as attempts')
+                ->selectRaw('AVG(time_taken) FILTER (WHERE completed = true) as avg_time_taken')
+                ->first();
+
+            $attempts = (int) $stats->attempts;
+
+            return [
+                'challenges_completed' => (int) $stats->completed,
+                'accuracy_rate' => round($attempts > 0 ? ($stats->completed / $attempts) * 100 : 0, 1),
+                'avg_time_per_challenge' => round((float) $stats->avg_time_taken),
+            ];
+        });
 
         return response()->json($metrics);
     }
