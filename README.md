@@ -45,12 +45,13 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 
 ### Home e métricas
 
-- Métricas de desempenho: desafios concluídos, taxa de acerto e tempo médio por desafio (`GET /user/metrics`), agregadas em uma única query e cacheadas no Redis por 60s (invalidadas ao ganhar XP)
+- Métricas de desempenho: desafios concluídos, taxa de acerto, tempo médio por desafio e sequência de dias (`GET /user/metrics`), agregadas em uma única query e cacheadas no Redis por 60s (invalidadas ao ganhar XP)
 - Atividade recente real da Home (`GET /user/recent-activity`), com as últimas tentativas do usuário em `challenge_user` (limitadas, `attempts > 0`, mais recentes primeiro, com tempo relativo em português)
 
 ### Gamificação
 
 - XP por desafio concluído com level up automático (curva de progressão crescente a cada nível)
+- Sequência de dias (streak): conta dias consecutivos com pelo menos um desafio concluído, exposto em `/api/user/metrics` (idempotente — não infla por repetir concluídos no mesmo dia)
 - Conquistas: conteúdos/definições gerenciados por admin, com progresso individual do usuário e recompensa em XP
 
 ## Endpoints principais da API
@@ -62,7 +63,7 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 | POST | `/api/login` | pública (throttle 5/min) | Login via sessão (sem token) |
 | POST | `/api/logout` | autenticado | Encerra a sessão e invalida cookies |
 | GET | `/api/user` | autenticado | Usuário logado |
-| GET | `/api/user/metrics` | autenticado | Métricas de desempenho (cache 60s) |
+| GET | `/api/user/metrics` | autenticado | Métricas de desempenho incl. streak (cache 60s) |
 | GET | `/api/user/recent-activity` | autenticado | Últimas atividades em `challenge_user` (query `?limit=`, default 5, máx 20) |
 | GET | `/api/type-encryption` | pública | Lista os tipos de cifra |
 | POST/PUT/DELETE | `/api/type-encryption[/{id}]` | admin (throttle: writes) | Escritas de tipos de cifra |
@@ -83,7 +84,7 @@ O backend usa PHPUnit com cobertura das principais garantias: auth SPA (sessão/
 
 ```bash
 cd backend
-composer test          # suíte completa (PHPUnit) — 30 testes
+composer test          # suíte completa (PHPUnit) — 35 testes
 
 cd frontend
 npx vue-tsc --noEmit   # checagem de tipos
@@ -94,7 +95,7 @@ npx oxlint             # lint
 
 - Novos tipos de cifra (Playfair e outras)
 - Histórico de desafios e reforço dos já resolvidos
-- Sequência de dias (streak) e recompensas
+- Recompensas por sequência de dias (bônus de XP no streak)
 
 ### Infraestrutura
 
