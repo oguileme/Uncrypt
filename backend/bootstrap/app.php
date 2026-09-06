@@ -25,6 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'cache.public' => \App\Http\Middleware\HttpCache::class,
             'admin' => \App\Http\Middleware\AdminOnly::class,
         ]);
+
+        // considera headers X-Forwarded-* apenas de proxies confiaveis (env);
+        // vazio = nenhum proxy, $request->ip() reflete o IP real do cliente
+        $middleware->trustProxies(
+            at: env('TRUSTED_PROXIES') ?: [],
+            headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PROTO | Request::HEADER_X_FORWARDED_PORT,
+        );
+
+        // teto global de requisicoes em todas as rotas da API (+ limites especificos)
+        $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
