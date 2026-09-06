@@ -43,7 +43,7 @@ onMounted(async () => {
 
       <StatsCards :level="me?.level" :xp-progress="me?.xp_progress" :xp-levelup="me?.xp_levelup"
         :accuracy-rate="metrics?.accuracy_rate" :challenges-completed="metrics?.challenges_completed"
-        :avg-time="metrics?.avg_time_per_challenge" />
+        :avg-time="metrics?.avg_time_per_challenge" :streak="metrics?.current_streak" />
 
       <div class="home-content">
         <div class="home-main">

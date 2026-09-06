@@ -5,6 +5,7 @@ export interface UserMetricsType {
   challenges_completed: number
   accuracy_rate: number
   avg_time_per_challenge: number
+  current_streak: number
 }
 
 export interface RecentActivityType {
