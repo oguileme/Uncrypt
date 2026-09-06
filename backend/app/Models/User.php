@@ -37,29 +37,4 @@ class User extends Authenticatable
             ->withPivot('completed', 'attempts')
             ->withTimestamps();
     }
-    
-    //metodos de metricas do user
-    public function challengesCompleted()
-    {
-        return $this->challenges()->wherePivot('completed', true)->count();
-    }
-
-    public function accuracyRate()
-    {
-        $totalAttempts = $this->challenges()->sum('challenge_user.attempts');
-        $completedChallenges = $this->challengesCompleted();
-
-        if ($totalAttempts === 0) {
-            return 0;
-        }
-
-        return ($completedChallenges / $totalAttempts) * 100;
-    }
-
-    public function avgTimePerChallenge(): float
-    {
-        return (float) $this->challenges()
-            ->wherePivot('completed', true)
-            ->avg('challenge_user.time_taken') ?? 0;
-    }
 }

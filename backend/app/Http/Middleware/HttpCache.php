@@ -17,7 +17,7 @@ class HttpCache
         $response->headers->set('Cache-Control', "{$scope}, max-age={$maxAge}, must-revalidate");
         $response->headers->set('ETag', '"' . md5($response->getContent()) . '"');
 
-        if ($request->isNotModified($response)) {
+        if ($response->isNotModified($request)) {
             return $response->setNotModified();
         }
 

@@ -21,8 +21,11 @@ class SecurityHeaders
         );
 
         // default de privacidade: sem cache; rotas publicas que liberam cache
-        // (HttpCache middleware) definem o proprio Cache-Control antes deste
-        if (! $response->headers->has('Cache-Control')) {
+        // (HttpCache middleware) definem o proprio Cache-Control antes deste.
+        // O Symfony prepara "no-cache, private" implicito em todas as respostas,
+        // entao precisamos substituir esse default, nao so o header ausente.
+        $cacheControl = $response->headers->get('Cache-Control');
+        if (! $cacheControl || $cacheControl === 'no-cache, private') {
             $response->headers->set('Cache-Control', 'no-store');
         }
 

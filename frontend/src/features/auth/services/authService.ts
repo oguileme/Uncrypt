@@ -6,6 +6,7 @@ interface RegisterPayload {
   username: string;
   email: string;
   password: string;
+  password_confirmation: string;
 }
 
 interface LoginPayload {
@@ -13,8 +14,7 @@ interface LoginPayload {
   password: string;
 }
 
-interface AuthResponse{
-  token: string;
+interface AuthResponse {
   user: UserType;
 }
 

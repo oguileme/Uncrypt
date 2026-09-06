@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\ChallengeUser;
 
 class ChallangeUserController extends Controller
@@ -164,6 +165,10 @@ class ChallangeUserController extends Controller
         }
 
         $user->save();
+
+        // metricas da home mudaram (xp/completado): invalida o cache do usuario
+        Cache::forget("user.metrics.{$user->id}");
+
         return $xp;
     }
 
