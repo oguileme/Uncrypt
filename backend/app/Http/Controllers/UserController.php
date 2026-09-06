@@ -34,6 +34,7 @@ class UserController extends Controller
                 'challenges_completed' => (int) $stats->completed,
                 'accuracy_rate' => round($attempts > 0 ? ($stats->completed / $attempts) * 100 : 0, 1),
                 'avg_time_per_challenge' => round((float) $stats->avg_time_taken),
+                'current_streak' => (int) auth()->user()->current_streak,
             ];
         });
 
