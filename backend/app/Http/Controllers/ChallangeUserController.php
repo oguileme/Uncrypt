@@ -133,6 +133,8 @@ class ChallangeUserController extends Controller
             $timeTaken = (int) abs(now()->diffInSeconds($challengeUser->created_at));
             $challengeUser->update(['completed' => true, 'time_taken' => $timeTaken]);
 
+            auth()->user()->touchStreak();
+
             // usar dica reduz o XP pela metade (arredondado para baixo)
             $baseXp = $challengeUser->challenge->xp;
             $halved = $challengeUser->hint_used;

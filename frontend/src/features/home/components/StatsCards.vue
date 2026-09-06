@@ -8,6 +8,7 @@ interface Props {
   accuracyRate?: number
   challengesCompleted?: number
   avgTime?: number
+  streak?: number
 }
 
 const props = defineProps<Props>()
@@ -112,13 +113,28 @@ function formatAvgTime(seconds?: number): string {
         }}
       </span>
     </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2C8 8 5 12 5 15a7 7 0 0 0 14 0c0-3-3-7-7-13z" />
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ streak ?? '\u2014' }}</span>
+        <span class="stat-label">Streak</span>
+      </div>
+      <span v-if="streak != null && streak > 0" class="stat-sub">
+        dia{{ streak === 1 ? '' : 's' }} seguido{{ streak === 1 ? '' : 's' }}
+      </span>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
 }
 
@@ -165,6 +181,11 @@ function formatAvgTime(seconds?: number): string {
 .icon-purple {
   background: var(--accent-purple-muted);
   color: var(--accent-purple);
+}
+
+.icon-red {
+  background: var(--accent-orange-muted);
+  color: var(--accent-orange);
 }
 
 .stat-info {
@@ -218,9 +239,9 @@ function formatAvgTime(seconds?: number): string {
   color: var(--text-subtle);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 481px) {
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
