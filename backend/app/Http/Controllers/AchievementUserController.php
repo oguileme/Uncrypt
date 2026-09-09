@@ -34,11 +34,11 @@ class AchievementUserController extends Controller
             'achievement_id' => 'required|integer',
         ]);
 
-        $achievementUser = AchievementUser::create([
-            'user_id' => auth()->id(),
-            'achievement_id' => $data['achievement_id'],
-        ]);
-        return response()->json($achievementUser,201);
+        $achievementUser = AchievementUser::firstOrCreate(
+            ['user_id' => auth()->id(), 'achievement_id' => $data['achievement_id']],
+        );
+
+        return response()->json($achievementUser, 201);
     }
 
     /**
@@ -93,6 +93,7 @@ class AchievementUserController extends Controller
         }
 
         $achievementUser->delete();
-        return response()->json(null,204);
+
+        return response()->json(null, 204);
     }
 }

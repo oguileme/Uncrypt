@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TypeEncryptionSeeder::class,
             ChallengeSeeder::class,
+            AchievementSeeder::class,
         ]);
     }
 }

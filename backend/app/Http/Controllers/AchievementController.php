@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Achievement;
 use Illuminate\Http\Request;
 
-
 class AchievementController extends Controller
 {
     /**
@@ -36,6 +35,8 @@ class AchievementController extends Controller
             'description' => 'required|string|max:255',
             'xp_reward' => 'required|integer',
             'required_count' => 'required|integer',
+            'icon' => 'required|string|max:32',
+            'color' => 'required|string|in:green,blue,yellow,purple,orange',
         ]);
 
         $achievement = Achievement::create($data);
@@ -59,7 +60,7 @@ class AchievementController extends Controller
     public function edit(Achievement $achievement)
     {
         //
-        
+
     }
 
     /**
@@ -73,9 +74,12 @@ class AchievementController extends Controller
             'description' => 'sometimes|string|max:255',
             'xp_reward' => 'sometimes|integer',
             'required_count' => 'sometimes|integer',
+            'icon' => 'sometimes|string|max:32',
+            'color' => 'sometimes|string|in:green,blue,yellow,purple,orange',
         ]);
 
         $achievement->update($data);
+
         return response()->json($achievement);
     }
 
@@ -86,6 +90,7 @@ class AchievementController extends Controller
     {
         //
         $achievement->delete();
+
         return response()->json(null, 204);
     }
 }

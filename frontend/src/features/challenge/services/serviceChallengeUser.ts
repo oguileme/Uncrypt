@@ -7,6 +7,8 @@ export interface AttemptResponse {
   completed: boolean
   xp_gained?: number
   xp_full?: number
+  streak_bonus?: number
+  streak_days?: number
   hint_used?: boolean
   time_taken?: number
   challenge_user?: ChallengeUserType

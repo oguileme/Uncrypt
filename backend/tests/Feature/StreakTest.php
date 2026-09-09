@@ -109,4 +109,101 @@ class StreakTest extends TestCase
             ->assertOk()
             ->assertJsonPath('current_streak', 3);
     }
+
+    public function test_first_day_completion_has_no_streak_bonus(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $challenge = Challenge::factory()->create(['phrase' => 'primeiro dia sem bonus', 'xp' => 73]);
+        $record = ChallengeUser::create([
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'completed' => false,
+            'attempts' => 0,
+        ]);
+
+        $this->postJson("/api/challenge-users/{$record->id}/attempt", [
+            'attempt' => 'primeiro dia sem bonus',
+        ])->assertOk()
+            ->assertJsonPath('streak_days', 1)
+            ->assertJsonPath('streak_bonus', 0)
+            ->assertJsonPath('xp_gained', 73);
+    }
+
+    public function test_streak_bonus_scales_from_second_consecutive_day(): void
+    {
+        $user = User::factory()->create([
+            'current_streak' => 6,
+            'streak_last_day' => now()->subDay(),
+        ]);
+        Sanctum::actingAs($user);
+
+        $challenge = Challenge::factory()->create(['phrase' => 'bonus de streak', 'xp' => 100]);
+        $record = ChallengeUser::create([
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'completed' => false,
+            'attempts' => 0,
+        ]);
+
+        // 7 dias de streak -> multiplicador 1.30 -> +30 XP sobre os 100 base
+        $this->postJson("/api/challenge-users/{$record->id}/attempt", [
+            'attempt' => 'bonus de streak',
+        ])->assertOk()
+            ->assertJsonPath('streak_days', 7)
+            ->assertJsonPath('xp_gained', 130)
+            ->assertJsonPath('streak_bonus', 30);
+    }
+
+    public function test_streak_bonus_caps_at_100_percent(): void
+    {
+        $user = User::factory()->create([
+            'current_streak' => 25,
+            'streak_last_day' => now()->subDay(),
+        ]);
+        Sanctum::actingAs($user);
+
+        $challenge = Challenge::factory()->create(['phrase' => 'bonus no teto', 'xp' => 100]);
+        $record = ChallengeUser::create([
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'completed' => false,
+            'attempts' => 0,
+        ]);
+
+        // 26 dias -> multiplier cap 2.0 -> dobra o XP
+        $this->postJson("/api/challenge-users/{$record->id}/attempt", [
+            'attempt' => 'bonus no teto',
+        ])->assertOk()
+            ->assertJsonPath('streak_days', 26)
+            ->assertJsonPath('xp_gained', 200)
+            ->assertJsonPath('streak_bonus', 100);
+    }
+
+    public function test_streak_bonus_applies_after_hint_halving(): void
+    {
+        $user = User::factory()->create([
+            'current_streak' => 10,
+            'streak_last_day' => now()->subDay(),
+        ]);
+        Sanctum::actingAs($user);
+
+        $challenge = Challenge::factory()->create(['phrase' => 'bonus com dica', 'xp' => 100]);
+        $record = ChallengeUser::create([
+            'user_id' => $user->id,
+            'challenge_id' => $challenge->id,
+            'completed' => false,
+            'attempts' => 0,
+            'hint_used' => true,
+        ]);
+
+        // base 50 (dica) x 1.50 (11 dias) = 75; bonus = 25
+        $this->postJson("/api/challenge-users/{$record->id}/attempt", [
+            'attempt' => 'bonus com dica',
+        ])->assertOk()
+            ->assertJsonPath('streak_days', 11)
+            ->assertJsonPath('xp_gained', 75)
+            ->assertJsonPath('streak_bonus', 25);
+    }
 }

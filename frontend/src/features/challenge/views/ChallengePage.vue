@@ -106,8 +106,8 @@ function getStatus(r?: ChallengeUserType) {
                   width="12"
                   height="12"
                   viewBox="0 0 16 16"
-                  :fill="filled ? '#d29922' : 'none'"
-                  :stroke="filled ? '#d29922' : '#6e7681'"
+                  :fill="filled ? 'var(--star-fill)' : 'none'"
+                  :stroke="filled ? 'var(--star-fill)' : 'var(--star-empty)'"
                   stroke-width="1.5"
                 >
                   <path d="M8 1.5l2 4 4.5.7-3.2 3.1.8 4.4L8 11.3l-4.1 2.4.8-4.4L1.5 6.2l4.5-.7z" />
@@ -364,7 +364,7 @@ function getStatus(r?: ChallengeUserType) {
   font-family: var(--font-body);
   color: var(--text-on-emphasis);
   background: var(--accent-green-dark);
-  border: 1px solid rgba(63, 185, 80, 0.4);
+  border: 1px solid rgba(63, 185, 80, 0.35);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.15s ease;
@@ -372,7 +372,7 @@ function getStatus(r?: ChallengeUserType) {
 }
 
 .btn-start:hover:not(:disabled) {
-  background: #2ea043;
+  background: var(--accent-green-hover);
 }
 
 .btn-start:disabled {
