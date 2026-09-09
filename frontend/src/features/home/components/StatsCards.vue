@@ -42,6 +42,16 @@ function formatAvgTime(seconds?: number): string {
   const rest = s % 60
   return rest ? `${m}m ${rest}s` : `${m}m`
 }
+
+const streakMultiplier = computed(() => {
+  const s = props.streak
+  if (s == null || s < 2) return null
+  return Math.min(1 + 0.05 * (s - 1), 2)
+})
+
+function formatMultiplier(value: number): string {
+  return 'x' + value.toFixed(2).replace(/\.?0+$/, '')
+}
 </script>
 
 <template>
@@ -124,9 +134,12 @@ function formatAvgTime(seconds?: number): string {
         <span class="stat-value">{{ streak ?? '\u2014' }}</span>
         <span class="stat-label">Streak</span>
       </div>
-      <span v-if="streak != null && streak > 0" class="stat-sub">
+      <div v-if="streak != null && streak > 0" class="stat-sub">
         dia{{ streak === 1 ? '' : 's' }} seguido{{ streak === 1 ? '' : 's' }}
-      </span>
+        <span v-if="streakMultiplier" class="streak-mult">
+          &middot; {{ formatMultiplier(streakMultiplier) }} XP
+        </span>
+      </div>
     </div>
   </div>
 </template>
@@ -211,6 +224,11 @@ function formatAvgTime(seconds?: number): string {
 .stat-sub {
   font-size: 12px;
   color: var(--text-subtle);
+}
+
+.streak-mult {
+  color: var(--accent-yellow);
+  font-weight: 600;
 }
 
 .stat-progress {

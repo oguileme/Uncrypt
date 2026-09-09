@@ -18,6 +18,8 @@ const hintOpen = ref(false)
 const checking = ref(false)
 const xpGained = ref<number | null>(null)
 const hintReduced = ref(false)
+const streakBonus = ref<number | null>(null)
+const streakDays = ref<number | null>(null)
 const hintConfirmOpen = ref(false)
 let hintMarked = false
 
@@ -63,6 +65,8 @@ async function checkAnswer() {
   if (response.completed) {
     xpGained.value = response.xp_gained ?? null
     hintReduced.value = response.hint_used ?? record.value?.hint_used ?? false
+    streakBonus.value = response.streak_bonus ?? null
+    streakDays.value = response.streak_days ?? null
     if (response.challenge_user) {
       record.value = { ...record.value, ...response.challenge_user }
     } else {
@@ -201,6 +205,9 @@ onUnmounted(() => {
           Correto! Voce decifrou a mensagem em {{ attempts }} tentativa{{ attempts > 1 ? 's' : '' }}.
           <span v-if="xpGained">
             +{{ xpGained }} XP<span v-if="hintReduced || hintUsed"> (metade - dica usada)</span>
+            <span v-if="streakBonus" class="streak-badge">
+              streak {{ streakDays }}d +{{ streakBonus }} XP
+            </span>
           </span>
         </div>
 
@@ -552,6 +559,18 @@ onUnmounted(() => {
   background: var(--accent-green-muted);
   color: var(--accent-green);
   border: 1px solid rgba(35, 134, 54, 0.3);
+}
+
+.streak-badge {
+  margin-left: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: var(--accent-yellow-muted);
+  color: var(--accent-yellow);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 .feedback-wrong {

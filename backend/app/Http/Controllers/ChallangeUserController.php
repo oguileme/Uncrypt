@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChallengeUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Models\ChallengeUser;
 
 class ChallangeUserController extends Controller
 {
@@ -31,7 +31,7 @@ class ChallangeUserController extends Controller
     public function store(Request $request)
     {
         //
-        if(!auth()->check()){
+        if (! auth()->check()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $data = $request->validate([
@@ -58,15 +58,17 @@ class ChallangeUserController extends Controller
     public function show(ChallengeUser $challengeUser)
     {
         //
-        if(auth()->id() !== $challengeUser->user_id) {
+        if (auth()->id() !== $challengeUser->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
         return response()->json($this->withCiphertext($challengeUser), 200);
     }
 
     private function withCiphertext(ChallengeUser $challengeUser): ChallengeUser
     {
         $challenge = $challengeUser->challenge->withCiphertext()->makeHidden('phrase');
+
         return $challengeUser->setRelation('challenge', $challenge);
     }
 
@@ -84,7 +86,7 @@ class ChallangeUserController extends Controller
     public function update(Request $request, ChallengeUser $challengeUser)
     {
         //
-        if(auth()->id() !== $challengeUser->user_id) {
+        if (auth()->id() !== $challengeUser->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $data = $request->validate([
@@ -92,9 +94,9 @@ class ChallangeUserController extends Controller
         ]);
 
         $challengeUser->update($data);
+
         return response()->json($challengeUser, 200);
     }
- 
 
     /**
      * Remove the specified resource from storage.
@@ -102,15 +104,17 @@ class ChallangeUserController extends Controller
     public function destroy(ChallengeUser $challengeUser)
     {
         //
-        if(auth()->id() !== $challengeUser->user_id) {
+        if (auth()->id() !== $challengeUser->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $challengeUser->delete();
+
         return response()->json(null, 204);
     }
 
-    public function attempt(Request $request, ChallengeUser $challengeUser){
-        if(auth()->id() !== $challengeUser->user_id){
+    public function attempt(Request $request, ChallengeUser $challengeUser)
+    {
+        if (auth()->id() !== $challengeUser->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -118,7 +122,7 @@ class ChallangeUserController extends Controller
             'attempt' => 'required|string|max:255',
         ]);
 
-        if($challengeUser->completed){
+        if ($challengeUser->completed) {
             return response()->json(['message' => 'Challenge already completed.', 'completed' => true], 200);
         }
 
@@ -128,7 +132,7 @@ class ChallangeUserController extends Controller
         $normalizedAttempt = mb_strtolower(trim($data['attempt']));
         $expected = mb_strtolower(trim($challengeUser->challenge->phrase));
 
-        if($normalizedAttempt === $expected){
+        if ($normalizedAttempt === $expected) {
             // abs + cast: diffInSeconds pode vir negativo/decimal e a coluna e integer
             $timeTaken = (int) abs(now()->diffInSeconds($challengeUser->created_at));
             $challengeUser->update(['completed' => true, 'time_taken' => $timeTaken]);
@@ -138,13 +142,21 @@ class ChallangeUserController extends Controller
             // usar dica reduz o XP pela metade (arredondado para baixo)
             $baseXp = $challengeUser->challenge->xp;
             $halved = $challengeUser->hint_used;
-            $xpGained = $this->awardXp($halved ? (int) floor($baseXp / 2) : $baseXp);
+            $baseAfterHint = $halved ? (int) floor($baseXp / 2) : $baseXp;
+
+            // bonus de streak: +5% por dia consecutivo a partir do 2o dia, cap de 2x
+            $streakDays = auth()->user()->current_streak;
+            $multiplier = min(1 + 0.05 * max(0, $streakDays - 1), 2.0);
+            $xpGained = $this->awardXp((int) floor($baseAfterHint * $multiplier));
+            $streakBonus = max(0, $xpGained - $baseAfterHint);
 
             return response()->json([
                 'message' => 'Challenge completed!',
                 'completed' => true,
                 'xp_gained' => $xpGained,
                 'xp_full' => $baseXp,
+                'streak_bonus' => $streakBonus,
+                'streak_days' => $streakDays,
                 'hint_used' => $halved,
                 'time_taken' => $timeTaken,
                 'challenge_user' => $this->withCiphertext($challengeUser->fresh()),
@@ -155,11 +167,12 @@ class ChallangeUserController extends Controller
     }
 
     // soma o xp no usuario com level up automatico ao atingir o limite
-    private function awardXp(int $xp): int{
+    private function awardXp(int $xp): int
+    {
         $user = auth()->user();
         $user->xp_progress += $xp;
 
-        while($user->xp_progress >= $user->xp_levelup){
+        while ($user->xp_progress >= $user->xp_levelup) {
             $user->xp_progress -= $user->xp_levelup;
             $user->level += 1;
             // curva de progressao: o custo do proximo nivel cresce (nivel 2 -> 200 xp, 3 -> 300, ...)
@@ -173,6 +186,4 @@ class ChallangeUserController extends Controller
 
         return $xp;
     }
-
-
 }
