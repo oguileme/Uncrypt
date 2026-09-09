@@ -89,8 +89,8 @@ function getStars(c: ChallengeType) {
               width="12"
               height="12"
               viewBox="0 0 16 16"
-              :fill="filled ? '#d29922' : 'none'"
-              :stroke="filled ? '#d29922' : '#6e7681'"
+              :fill="filled ? 'var(--star-fill)' : 'none'"
+              :stroke="filled ? 'var(--star-fill)' : 'var(--star-empty)'"
               stroke-width="1.5"
             >
               <path d="M8 1.5l2 4 4.5.7-3.2 3.1.8 4.4L8 11.3l-4.1 2.4.8-4.4L1.5 6.2l4.5-.7z" />
@@ -271,7 +271,7 @@ function getStars(c: ChallengeType) {
 }
 
 .recommended-item:hover:not(:disabled) .btn-start {
-  color: #58a6ff;
+  color: var(--text-link);
 }
 
 .recommended-item:hover:not(:disabled) svg {

@@ -305,18 +305,18 @@ async function handleSubmit() {
   font-family: var(--font-body);
   color: var(--text-on-emphasis);
   background: var(--accent-green-dark);
-  border: 1px solid rgba(63, 185, 80, 0.4);
+  border: 1px solid rgba(63, 185, 80, 0.35);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-submit:hover {
-  background: #2ea043;
+  background: var(--accent-green-hover);
 }
 
 .btn-submit:active {
-  background: #238636;
+  background: var(--accent-green-dark);
 }
 
 .btn-submit:focus-visible {
@@ -356,6 +356,6 @@ async function handleSubmit() {
 }
 .error-message {
   font-size: 13px;
-  color: #f85149;
+  color: var(--accent-red);
 }
 </style>

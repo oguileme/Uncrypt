@@ -142,15 +142,15 @@ onUnmounted(() => {
 }
 
 .dot-red {
-  background: #f85149;
+  background: var(--accent-red);
 }
 
 .dot-yellow {
-  background: #d29922;
+  background: var(--accent-yellow);
 }
 
 .dot-green {
-  background: #3fb950;
+  background: var(--accent-green);
 }
 
 .terminal-title {
@@ -230,11 +230,11 @@ onUnmounted(() => {
 .btn-primary {
   color: var(--text-on-emphasis);
   background: var(--accent-green-dark);
-  border-color: rgba(63, 185, 80, 0.4);
+  border-color: rgba(63, 185, 80, 0.35);
 }
 
 .btn-primary:hover {
-  background: #2ea043;
+  background: var(--accent-green-hover);
   text-decoration: none;
 }
 

@@ -138,8 +138,8 @@ onUnmounted(() => {
                 width="14"
                 height="14"
                 viewBox="0 0 16 16"
-                :fill="filled ? '#d29922' : 'none'"
-                :stroke="filled ? '#d29922' : '#6e7681'"
+                :fill="filled ? 'var(--star-fill)' : 'none'"
+                :stroke="filled ? 'var(--star-fill)' : 'var(--star-empty)'"
                 stroke-width="1.5"
               >
                 <path d="M8 1.5l2 4 4.5.7-3.2 3.1.8 4.4L8 11.3l-4.1 2.4.8-4.4L1.5 6.2l4.5-.7z" />
@@ -414,15 +414,15 @@ onUnmounted(() => {
 }
 
 .dot-red {
-  background: #f85149;
+  background: var(--accent-red);
 }
 
 .dot-yellow {
-  background: #d29922;
+  background: var(--accent-yellow);
 }
 
 .dot-green {
-  background: #3fb950;
+  background: var(--accent-green);
 }
 
 .terminal-title {
@@ -521,7 +521,7 @@ onUnmounted(() => {
   font-family: var(--font-body);
   color: var(--text-on-emphasis);
   background: var(--accent-green-dark);
-  border: 1px solid rgba(63, 185, 80, 0.4);
+  border: 1px solid rgba(63, 185, 80, 0.35);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.15s ease;
@@ -529,7 +529,7 @@ onUnmounted(() => {
 }
 
 .btn-verify:hover:not(:disabled) {
-  background: #2ea043;
+  background: var(--accent-green-hover);
 }
 
 .btn-verify:disabled {
@@ -610,7 +610,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(1, 4, 9, 0.72);
+  background: var(--overlay-dim);
   backdrop-filter: blur(4px);
 }
 
@@ -716,11 +716,11 @@ onUnmounted(() => {
 .btn-confirm {
   color: var(--text-on-emphasis);
   background: var(--accent-green-dark);
-  border-color: rgba(63, 185, 80, 0.4);
+  border-color: rgba(63, 185, 80, 0.35);
 }
 
 .btn-confirm:hover {
-  background: #2ea043;
+  background: var(--accent-green-hover);
 }
 
 .btn-confirm:focus-visible,

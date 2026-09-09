@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { logout } from '@/features/auth/services/authService'
 import { useAuth } from '@/features/auth/composables/useAuth'
+import ThemeToggle from './ThemeToggle.vue'
 
 const router = useRouter()
 const { clearAuth, isLoggedIn, user } = useAuth()
@@ -100,6 +101,7 @@ onUnmounted(() => {
         </template>
 
         <div class="navbar-actions">
+          <ThemeToggle />
           <template v-if="isLoggedIn">
             <div class="user-menu" ref="dropdownRef">
               <button class="user-trigger" @click.stop="toggleDropdown">
@@ -258,16 +260,16 @@ onUnmounted(() => {
 .btn-primary {
   color: var(--text-on-emphasis);
   background: var(--accent-green-dark);
-  border-color: rgba(63, 185, 80, 0.4);
+  border-color: rgba(63, 185, 80, 0.35);
 }
 
 .btn-primary:hover {
-  background: #2ea043;
+  background: var(--accent-green-hover);
   text-decoration: none;
 }
 
 .btn-primary:active {
-  background: #238636;
+  background: var(--accent-green-dark);
 }
 
 /* User menu */

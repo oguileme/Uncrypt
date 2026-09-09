@@ -396,7 +396,7 @@ const xpRemaining = computed(() => {
 
 .chip-rank {
   background: var(--accent-green-muted);
-  border-color: rgba(63, 185, 80, 0.4);
+  border-color: rgba(63, 185, 80, 0.35);
   color: var(--accent-green);
 }
 
