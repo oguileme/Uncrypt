@@ -19,6 +19,8 @@ class AchievementFactory extends Factory
             'description' => fake()->sentence(),
             'xp_reward' => fake()->numberBetween(10, 100),
             'required_count' => fake()->numberBetween(1, 10),
+            'icon' => fake()->randomElement(['key', 'rotor', 'gear', 'wave', 'lock', 'star', 'vault', 'compass']),
+            'color' => fake()->randomElement(['green', 'blue', 'yellow', 'purple', 'orange']),
         ];
     }
 }

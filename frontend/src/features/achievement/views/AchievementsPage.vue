@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { mockAchievements, mockProgress } from '../data/mockAchievements'
-import type { Achievement } from '../types/typeAchievement'
+import { ref, computed, onMounted } from 'vue'
+import { getAchievements, getMyAchievementProgress } from '../services/serviceAchievement'
+import type { Achievement, AchievementProgressUser } from '../types/typeAchievement'
 import AchievementBadge from '../components/AchievementBadge.vue'
 import AchievementArsenalHeader from '../components/AchievementArsenalHeader.vue'
 import AchievementFilter, { type AchievementFilterKind } from '../components/AchievementFilter.vue'
 
-const achievements = ref<Achievement[]>(mockAchievements)
-const progress = mockProgress
+const achievements = ref<Achievement[]>([])
+const progress = ref<AchievementProgressUser[]>([])
 const filter = ref<AchievementFilterKind>('all')
+const loading = ref(true)
+const error = ref<string | null>(null)
 
 function progressFor(id: number) {
-  return progress.find((p) => p.achievement_id === id)
+  return progress.value.find((p) => p.achievement_id === id)
 }
 
 const counts = computed(() => ({
@@ -37,6 +39,24 @@ const visible = computed(() => {
       return comp(y) - comp(x)
     })
 })
+
+async function loadData() {
+  const [achievementsRes, progressRes] = await Promise.allSettled([
+    getAchievements(),
+    getMyAchievementProgress(),
+  ])
+
+  achievements.value = achievementsRes.status === 'fulfilled' ? achievementsRes.value : []
+  progress.value = progressRes.status === 'fulfilled' ? progressRes.value : []
+
+  if (achievementsRes.status === 'rejected') {
+    error.value = 'Nao foi possivel carregar as conquistas. Tente novamente mais tarde.'
+  }
+
+  loading.value = false
+}
+
+onMounted(loadData)
 </script>
 
 <template>
@@ -52,22 +72,28 @@ const visible = computed(() => {
         </p>
       </header>
 
-      <AchievementArsenalHeader :achievements="achievements" :progress="progress" />
+      <div v-if="loading" class="state-box">Carregando conquistas...</div>
 
-      <AchievementFilter v-model="filter" :counts="counts" />
+      <div v-else-if="error" class="feedback feedback-wrong state-box">{{ error }}</div>
 
-      <section class="arsenal-grid" aria-label="Lista de conquistas">
-        <AchievementBadge
-          v-for="{ a, p } in visible"
-          :key="a.id"
-          :achievement="a"
-          :progress="p"
-        />
-      </section>
+      <template v-else>
+        <AchievementArsenalHeader :achievements="achievements" :progress="progress" />
 
-      <section class="empty-warning" v-if="visible.length === 0">
-        Nenhuma conquista nesta aba ainda. Continue decifrando!
-      </section>
+        <AchievementFilter v-model="filter" :counts="counts" />
+
+        <section class="arsenal-grid" aria-label="Lista de conquistas">
+          <AchievementBadge
+            v-for="{ a, p } in visible"
+            :key="a.id"
+            :achievement="a"
+            :progress="p"
+          />
+        </section>
+
+        <section class="empty-warning" v-if="visible.length === 0">
+          Nenhuma conquista nesta aba ainda. Continue decifrando!
+        </section>
+      </template>
     </div>
   </main>
 </template>
@@ -122,6 +148,20 @@ const visible = computed(() => {
   text-align: center;
   font-size: 13px;
   color: var(--text-subtle);
+}
+
+.state-box {
+  padding: 32px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.feedback-wrong {
+  background: var(--accent-red-muted);
+  color: var(--accent-red);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: var(--radius-md);
 }
 
 @media (max-width: 768px) {
