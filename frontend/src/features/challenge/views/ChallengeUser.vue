@@ -5,6 +5,9 @@ import { getChallengeUserById, attemptChallengeUser, setHintUsed } from '../serv
 import type { AttemptResponse } from '../services/serviceChallengeUser'
 import type { ChallengeUserType } from '../types/typeChallangeUser'
 import { getTypeColor, difficultyToStars } from '../utils/cipherStyles'
+import { useChallengeTimer } from '../composables/useChallengeTimer'
+import { formatTimeHuman } from '../utils/formatTime'
+import ChallengeTimer from '../components/ChallengeTimer.vue'
 
 const route = useRoute()
 
@@ -22,6 +25,9 @@ const streakBonus = ref<number | null>(null)
 const streakDays = ref<number | null>(null)
 const hintConfirmOpen = ref(false)
 let hintMarked = false
+
+const { elapsed, start, stop } = useChallengeTimer()
+const finalTime = ref<number | null>(null)
 
 const activeChallenge = computed(() => record.value?.challenge ?? null)
 const typeColor = computed(() => getTypeColor(activeChallenge.value?.type_encryption?.name ?? ''))
@@ -41,6 +47,7 @@ function getTypeBadgeClass(color: string) {
 onMounted(async () => {
   try {
     record.value = await getChallengeUserById(Number(route.params.id))
+    if (!record.value.completed) start()
   } catch {
     loadError.value = true
   } finally {
@@ -63,6 +70,8 @@ async function checkAnswer() {
   feedback.value = response.completed ? 'correct' : 'wrong'
 
   if (response.completed) {
+    stop()
+    finalTime.value = response.time_taken ?? elapsed.value
     xpGained.value = response.xp_gained ?? null
     hintReduced.value = response.hint_used ?? record.value?.hint_used ?? false
     streakBonus.value = response.streak_bonus ?? null
@@ -150,6 +159,7 @@ onUnmounted(() => {
               </svg>
             </template>
           </div>
+          <ChallengeTimer v-if="!isCompleted" class="challenge-timer" :elapsed="elapsed" />
         </div>
         <h1 class="challenge-title">{{ activeChallenge.title }}</h1>
         <p class="challenge-desc">{{ activeChallenge.description }}</p>
@@ -202,7 +212,11 @@ onUnmounted(() => {
               d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.28 5.22a.75.75 0 0 0-1.06 0L6.75 8.69 5.28 7.22a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l4-4a.75.75 0 0 0 0-1.06Z"
             />
           </svg>
-          Correto! Voce decifrou a mensagem em {{ attempts }} tentativa{{ attempts > 1 ? 's' : '' }}.
+          Correto! Voce decifrou a mensagem em {{ attempts }} tentativa{{ attempts > 1 ? 's' : '' }}<span
+            v-if="finalTime != null"
+          >
+            em {{ formatTimeHuman(finalTime) }}</span
+          >.
           <span v-if="xpGained">
             +{{ xpGained }} XP<span v-if="hintReduced || hintUsed"> (metade - dica usada)</span>
             <span v-if="streakBonus" class="streak-badge">
@@ -377,6 +391,10 @@ onUnmounted(() => {
 .challenge-stars {
   display: flex;
   gap: 2px;
+}
+
+.challenge-timer {
+  margin-left: auto;
 }
 
 .challenge-title {
