@@ -58,4 +58,9 @@ class User extends Authenticatable
         $this->streak_last_day = today();
         $this->save();
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
 }
