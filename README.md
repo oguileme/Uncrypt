@@ -51,8 +51,14 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 ### Gamificação
 
 - XP por desafio concluído com level up automático (curva de progressão crescente a cada nível)
-- Sequência de dias (streak): conta dias consecutivos com pelo menos um desafio concluído, exposto em `/api/user/metrics` (idempotente — não infla por repetir concluídos no mesmo dia)
+- Sequência de dias (streak): conta dias consecutivos com pelo menos um desafio concluído, exposto em `/api/user/metrics` (idempotente — não infla por repetir concluídos no mesmo dia); a partir do segundo dia consecutivo cada conclusão ganha bônus de XP com multiplicador de 5% por dia de streak (capped em 2x)
 - Conquistas: conteúdos/definições gerenciados por admin, com progresso individual do usuário e recompensa em XP
+
+### Feedback
+
+- Widget global disponível em todas as páginas autenticadas: botão flutuante que abre um painel para reportar **bugs**, **sugestões** ou comentários **gerais**
+- Cada envio guarda o tipo, o texto, `user_id` do usuário logado e `context_url` (URL da página onde o feedback foi feito)
+- Registros nascem com status `new` (fluxo futuro de gestão: `in_progress` e `resolved`); envio com rate limit próprio (`writes`, 60/min por usuário)
 
 ## Endpoints principais da API
 
@@ -75,6 +81,7 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 | GET | `/api/achievement` | autenticado | Lista conquistas (definições) |
 | POST/PUT/DELETE | `/api/achievement[/{id}]` | admin | Escritas de conquistas |
 | GET/POST/PUT/DELETE | `/api/achievement-progress[/{id}]` | autenticado (dono) | Progresso do usuário nas conquistas |
+| POST | `/api/feedback` | autenticado (throttle: writes) | Registra feedback (bug/sugestão/geral) com a URL de contexto |
 
 > Exceto rotas marcadas como públicas, todas exigem autenticação; rotas de escrita exigem o header `X-XSRF-TOKEN` (pipeline SPA). Além dos limites específicos acima, toda a API está sujeita ao teto global `api` (120/min por usuário ou IP).
 
@@ -84,7 +91,7 @@ O backend usa PHPUnit com cobertura das principais garantias: auth SPA (sessão/
 
 ```bash
 cd backend
-composer test          # suíte completa (PHPUnit) — 35 testes
+composer test          # suíte completa (PHPUnit) — 43 testes
 
 cd frontend
 npx vue-tsc --noEmit   # checagem de tipos
@@ -95,7 +102,7 @@ npx oxlint             # lint
 
 - Novos tipos de cifra (Playfair e outras)
 - Histórico de desafios e reforço dos já resolvidos
-- Recompensas por sequência de dias (bônus de XP no streak)
+- Gestão de feedback (painel admin com status `in_progress`/`resolved`)
 
 ### Infraestrutura
 
