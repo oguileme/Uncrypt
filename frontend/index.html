@@ -6,20 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Desvende os segredos da criptografia com desafios interativos e gamificação." />
     <title>Uncrypt</title>
-    <script>
-      ;(function () {
-        try {
-          var stored = localStorage.getItem('uncrypt-theme')
-          var theme =
-            stored === 'dark' || stored === 'light'
-              ? stored
-              : window.matchMedia('(prefers-color-scheme: light)').matches
-                ? 'light'
-                : 'dark'
-          document.documentElement.dataset.theme = theme
-        } catch (e) {}
-      })()
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="app"></div>
