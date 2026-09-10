@@ -73,6 +73,7 @@ class FeedbackController extends Controller
         ]);
 
         $feedback->update($data);
+
         return response()->json($feedback);
     }
 
@@ -83,6 +84,7 @@ class FeedbackController extends Controller
     {
         //
         $feedback->delete();
+
         return response()->json(null, 204);
     }
 }

@@ -1,21 +1,19 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ChallengeController;
-use App\Http\Controllers\TypeEncryptonController;
-use App\Http\Controllers\ChallangeUserController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\AchievementUserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChallangeUserController;
+use App\Http\Controllers\ChallengeController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\TypeEncryptonController;
+use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
-
-
 
 // leitura dos tipos de cifra e publica (usada na landing e na listagem)
 Route::get('/type-encryption', [TypeEncryptonController::class, 'index'])->middleware('cache.public');
@@ -65,4 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/recent-activity', [UserController::class, 'getRecentActivity'])->name('user.recent-activity');
 
     Route::get('challenge/recommendations', [ChallengeController::class, 'getChallengeRecommendations'])->name('challenge.recommendations');
+
+    // feedback: usuarios autenticados reportam bugs/sugestoes com o contexto da pagina
+    Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:writes');
 });

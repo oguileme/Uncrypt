@@ -8,6 +8,12 @@ class Feedback extends Model
 {
     //
     protected $table = 'feedback';
+
+    protected $attributes = [
+        'feedback_type' => 'general',
+        'status' => 'new',
+    ];
+
     protected $fillable = [
         'user_id',
         'context_url',
