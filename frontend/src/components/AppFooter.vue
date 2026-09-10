@@ -1,8 +1,19 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useTheme } from '@/composables/useTheme'
+import logoDark from '@/assets/uncrypt fonte sem fundo.png'
+import logoLight from '@/assets/uncrypt-fonte-preta-sem-fundo.png'
+
+const { theme } = useTheme()
+
+const footerLogo = computed(() => (theme.value === 'light' ? logoLight : logoDark))
+</script>
+
 <template>
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-left">
-        <img src="@/assets/uncrypt fonte sem fundo.png" alt="Uncrypt" class="footer-logo" />
+        <img :src="footerLogo" alt="Uncrypt" class="footer-logo" />
         <span class="footer-copy">&copy; 2026 Uncrypt. Todos os direitos reservados.</span>
       </div>
       <div class="footer-links">

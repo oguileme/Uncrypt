@@ -3,10 +3,16 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { logout } from '@/features/auth/services/authService'
 import { useAuth } from '@/features/auth/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 import ThemeToggle from './ThemeToggle.vue'
+import logoDark from '@/assets/uncrypt fonte sem fundo.png'
+import logoLight from '@/assets/uncrypt-fonte-preta-sem-fundo.png'
 
 const router = useRouter()
 const { clearAuth, isLoggedIn, user } = useAuth()
+const { theme } = useTheme()
+
+const navbarLogo = computed(() => (theme.value === 'light' ? logoLight : logoDark))
 
 const userInitials = computed(() => {
   const name = user.value?.name?.trim()
@@ -58,7 +64,7 @@ onUnmounted(() => {
   <nav class="navbar">
     <div class="navbar-inner">
       <RouterLink to="/" class="navbar-brand">
-        <img src="@/assets/uncrypt fonte sem fundo.png" alt="Uncrypt" class="navbar-logo" />
+        <img :src="navbarLogo" alt="Uncrypt" class="navbar-logo" />
       </RouterLink>
 
       <button class="menu-toggle" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }">
