@@ -62,6 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user/recent-activity', [UserController::class, 'getRecentActivity'])->name('user.recent-activity');
 
+    Route::get('/ranking', [UserController::class, 'getRanking'])->name('ranking');
+
     Route::get('challenge/recommendations', [ChallengeController::class, 'getChallengeRecommendations'])->name('challenge.recommendations');
 
     // feedback: usuarios autenticados reportam bugs/sugestoes com o contexto da pagina

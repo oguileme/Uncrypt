@@ -51,6 +51,12 @@ const router = createRouter({
     },
 
     {
+      path: '/ranking',
+      name: 'ranking',
+      component: () => import('../features/ranking/views/RankingPage.vue'),
+    },
+
+    {
       path: '/challenge/:id',
       name: 'challenge-detail',
       component: () => import('../features/challenge/views/ChallengeUser.vue'),

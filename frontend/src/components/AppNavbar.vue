@@ -99,7 +99,14 @@ onUnmounted(() => {
           >
             Conquistas
           </RouterLink>
-          <a href="#" class="nav-link" @click="menuOpen = false">Ranking</a>
+          <RouterLink
+            to="/ranking"
+            class="nav-link"
+            :class="{ active: route.path === '/ranking' }"
+            @click="menuOpen = false"
+          >
+            Ranking
+          </RouterLink>
         </template>
         <template v-else>
           <a href="#features" class="nav-link" @click="menuOpen = false">Funcionalidades</a>
