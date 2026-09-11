@@ -8,5 +8,5 @@
           ? 'light'
           : 'dark'
     document.documentElement.dataset.theme = theme
-  } catch (e) {}
+  } catch {}
 })()

@@ -63,6 +63,12 @@ const router = createRouter({
     },
 
     {
+      path: '/history',
+      name: 'history',
+      component: () => import('../features/history/views/HistoryPage.vue'),
+    },
+
+    {
       path: '/challenge/:id',
       name: 'challenge-detail',
       component: () => import('../features/challenge/views/ChallengeUser.vue'),

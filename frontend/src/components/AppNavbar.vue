@@ -143,6 +143,13 @@ onUnmounted(() => {
                     </svg>
                     Meu Perfil
                   </RouterLink>
+                  <RouterLink to="/history" class="dropdown-item" @click="closeDropdown">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <circle cx="12" cy="12" r="1" />
+                      <path d="M12 7v5l3 2M12 3a9 9 0 1 0 9 9" />
+                    </svg>
+                    Hist&oacute;rico
+                  </RouterLink>
                   <RouterLink to="/settings" class="dropdown-item" @click="closeDropdown">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <circle cx="12" cy="12" r="3" />

@@ -62,6 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user/recent-activity', [UserController::class, 'getRecentActivity'])->name('user.recent-activity');
 
+    Route::get('/user/history', [UserController::class, 'getHistory'])->name('user.history');
+
     Route::get('/ranking', [UserController::class, 'getRanking'])->name('ranking');
 
     Route::get('challenge/recommendations', [ChallengeController::class, 'getChallengeRecommendations'])->name('challenge.recommendations');

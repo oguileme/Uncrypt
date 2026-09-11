@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { AxiosError } from 'axios'
 import { useRouter } from 'vue-router'
 import { register } from '../services/authService'
 import { useAuth } from '../composables/useAuth'
@@ -35,11 +36,12 @@ async function handleSubmit() {
     })
     setAuth(user)
     router.push('/home')
-  } catch (err: any) {
-    if (err.response?.status === 422) {
-      const errors = err.response.data.errors
+  } catch (err) {
+    const axiosError = err as AxiosError<{ errors?: Record<string, unknown> }>
+    if (axiosError.response?.status === 422) {
+      const errors = axiosError.response.data.errors ?? {}
       const first = Object.values(errors)[0]
-      errorMessage.value = Array.isArray(first) ? first[0] : 'Erro de validação.'
+      errorMessage.value = Array.isArray(first) ? String(first[0]) : 'Erro de validação.'
     } else {
       errorMessage.value = 'Erro ao criar conta. Tente novamente.'
     }

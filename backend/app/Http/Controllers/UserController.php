@@ -72,6 +72,36 @@ class UserController extends Controller
     }
 
     /**
+     * Retorna o historico de desafios do usuario logado (paginaod).
+     */
+    public function getHistory(Request $request)
+    {
+        if (! auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $perPage = max(5, min((int) $request->integer('per_page', 15), 50));
+
+        $history = ChallengeUser::where('user_id', auth()->id())
+            ->with(['challenge:id,title,xp,type_encryption_id', 'challenge.typeEncryption:id,name'])
+            ->orderByDesc('updated_at')
+            ->paginate($perPage)
+            ->through(fn ($cu) => [
+                'id' => $cu->id,
+                'challenge' => $cu->challenge?->title ?? 'Desafio excluído',
+                'type' => $cu->challenge?->typeEncryption?->name ?? null,
+                'xp' => $cu->challenge?->xp,
+                'completed' => (bool) $cu->completed,
+                'attempts' => $cu->attempts,
+                'hint_used' => (bool) $cu->hint_used,
+                'time_taken' => $cu->time_taken,
+                'concluded_at' => $cu->completed ? $cu->updated_at->toIso8601String() : null,
+            ]);
+
+        return response()->json($history);
+    }
+
+    /**
      * Retorna o ranking dos usuarios por nivel e progresso de XP.
      */
     public function getRanking(Request $request)
