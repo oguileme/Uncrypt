@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TypeEncrypton;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -42,6 +43,13 @@ class TypeEncryptonController extends Controller
         ]);
         $typeEncrypton = TypeEncrypton::create($data);
 
+        AdminAudit::record([
+            'action' => 'type_encryption.created',
+            'target_type' => 'type_encryption',
+            'target_id' => $typeEncrypton->id,
+            'changes' => $data,
+        ]);
+
         Cache::forget('type-encryption.index');
         Cache::forget('challenges.index');
 
@@ -78,6 +86,13 @@ class TypeEncryptonController extends Controller
         ]);
         $typeEncrypton->update($data);
 
+        AdminAudit::record([
+            'action' => 'type_encryption.updated',
+            'target_type' => 'type_encryption',
+            'target_id' => $typeEncrypton->id,
+            'changes' => $typeEncrypton->getChanges(),
+        ]);
+
         // renomear o tipo invalida o ciphertext materializado dos desafios desse tipo
         if ($typeEncrypton->wasChanged('name')) {
             foreach ($typeEncrypton->challenges()->get() as $challenge) {
@@ -98,6 +113,13 @@ class TypeEncryptonController extends Controller
     public function destroy(TypeEncrypton $typeEncrypton)
     {
         //
+        AdminAudit::record([
+            'action' => 'type_encryption.deleted',
+            'target_type' => 'type_encryption',
+            'target_id' => $typeEncrypton->id,
+            'changes' => ['name' => $typeEncrypton->name],
+        ]);
+
         $typeEncrypton->delete();
 
         Cache::forget('type-encryption.index');

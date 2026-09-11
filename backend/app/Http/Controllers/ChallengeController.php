@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Challenge;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Throwable;
 
 class ChallengeController extends Controller
 {
@@ -42,7 +42,7 @@ class ChallengeController extends Controller
     public function store(Request $request)
     {
         //
-        $data =$request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'type_encryption_id' => 'required|integer| exists:type_encryption,id',
@@ -50,8 +50,16 @@ class ChallengeController extends Controller
             'key' => 'sometimes|string|max:255',
             'xp' => 'required|integer',
             'hint' => 'required|string|max:255',
+            'is_active' => 'sometimes|boolean',
         ]);
         $challenge = Challenge::create($data);
+
+        AdminAudit::record([
+            'action' => 'challenge.created',
+            'target_type' => 'challenge',
+            'target_id' => $challenge->id,
+            'changes' => array_diff_key($data, array_flip(['phrase', 'key'])),
+        ]);
 
         Cache::forget('challenges.index');
 
@@ -85,7 +93,7 @@ class ChallengeController extends Controller
     public function update(Request $request, Challenge $challenge)
     {
         //
-        $data =$request->validate([
+        $data = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string|max:255',
             'type_encryption_id' => 'sometimes|integer| exists:type_encryption,id',
@@ -93,8 +101,17 @@ class ChallengeController extends Controller
             'key' => 'sometimes|string|max:255',
             'xp' => 'sometimes|integer',
             'hint' => 'sometimes|string|max:255',
+            'is_active' => 'sometimes|boolean',
         ]);
         $challenge->update($data);
+
+        // nunca registra frase/chave no log de auditoria (material sensivel)
+        AdminAudit::record([
+            'action' => 'challenge.updated',
+            'target_type' => 'challenge',
+            'target_id' => $challenge->id,
+            'changes' => array_diff_key($challenge->getChanges(), array_flip(['phrase', 'key'])),
+        ]);
 
         Cache::forget('challenges.index');
         Cache::forget("challenges.{$challenge->id}");
@@ -108,6 +125,13 @@ class ChallengeController extends Controller
     public function destroy(Challenge $challenge)
     {
         //
+        AdminAudit::record([
+            'action' => 'challenge.deleted',
+            'target_type' => 'challenge',
+            'target_id' => $challenge->id,
+            'changes' => ['title' => $challenge->title],
+        ]);
+
         $challenge->delete();
 
         Cache::forget('challenges.index');
@@ -135,11 +159,9 @@ class ChallengeController extends Controller
         });
 
         $recommended = collect($allChallenges)
-            ->filter(fn (array $challenge) => !in_array($challenge['id'], $completedChallenges))
+            ->filter(fn (array $challenge) => ! in_array($challenge['id'], $completedChallenges))
             ->values();
 
         return response()->json($recommended);
     }
-
-
 }
