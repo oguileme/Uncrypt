@@ -45,6 +45,24 @@ class FeedbackTest extends TestCase
         ]);
     }
 
+    public function test_store_ignores_client_supplied_user_id_to_prevent_idor(): void
+    {
+        $author = User::factory()->create();
+        $other = User::factory()->create();
+        Sanctum::actingAs($author);
+
+        $this->postJson('/api/feedback', [
+            'user_id' => $other->id,
+            'context_url' => 'http://localhost:5173/home',
+            'feedback_text' => 'tentativa de spoofing do autor',
+            'feedback_type' => 'bug',
+        ])->assertCreated()
+            ->assertJsonPath('user_id', $author->id);
+
+        $this->assertDatabaseHas('feedback', ['user_id' => $author->id]);
+        $this->assertDatabaseMissing('feedback', ['user_id' => $other->id]);
+    }
+
     public function test_invalid_feedback_type_is_rejected(): void
     {
         $user = User::factory()->create();
