@@ -115,6 +115,7 @@ class UserController extends Controller
 
         $ranking = Cache::remember("ranking.top.{$limit}", 60, function () use ($limit) {
             return User::query()
+                ->where('is_admin', false)
                 ->orderByDesc('level')
                 ->orderByDesc('xp_progress')
                 ->orderBy('name')

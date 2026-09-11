@@ -61,6 +61,27 @@ class RankingTest extends TestCase
             ->assertJsonCount(16);
     }
 
+    public function test_ranking_excludes_admin_accounts(): void
+    {
+        User::factory()->create(['name' => 'AdminTop', 'level' => 99, 'xp_progress' => 9999, 'is_admin' => true]);
+        User::factory()->create(['name' => 'ComumTop', 'level' => 5, 'xp_progress' => 500]);
+        User::factory()->create(['name' => 'ComumBaixo', 'level' => 1, 'xp_progress' => 10]);
+        Sanctum::actingAs(User::factory()->create(['name' => 'Leitor', 'level' => 2]));
+
+        $this->getJson('/api/ranking')
+            ->assertOk()
+            ->assertJsonCount(3)
+            ->assertJsonPath('0.name', 'ComumTop')
+            ->assertJsonPath('1.name', 'Leitor')
+            ->assertJsonPath('2.name', 'ComumBaixo')
+            ->assertJsonMissing([['name' => 'AdminTop']]);
+
+        $this->getJson('/api/ranking?limit=50')
+            ->assertOk()
+            ->assertJsonCount(3)
+            ->assertJsonMissing([['name' => 'AdminTop']]);
+    }
+
     public function test_ranking_exposes_streak_but_hides_sensitive_fields(): void
     {
         User::factory()->create(['level' => 8, 'current_streak' => 4]);
