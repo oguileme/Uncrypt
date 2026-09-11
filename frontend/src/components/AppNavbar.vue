@@ -143,6 +143,13 @@ onUnmounted(() => {
                     </svg>
                     Meu Perfil
                   </RouterLink>
+                  <RouterLink v-if="user?.is_admin" to="/admin" class="dropdown-item" @click="closeDropdown">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M12 2l7 4v6c0 4.4-3 8.5-7 10-4-1.5-7-5.6-7-10V6l7-4z" />
+                      <path d="M9.5 12l2 2 3.5-3.5" />
+                    </svg>
+                    Painel Admin
+                  </RouterLink>
                   <RouterLink to="/history" class="dropdown-item" @click="closeDropdown">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <circle cx="12" cy="12" r="1" />

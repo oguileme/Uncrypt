@@ -2,6 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { useAuth } from '@/features/auth/composables/useAuth'
 
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    requiresAdmin?: boolean
+  }
+}
+
 const publicRoutes = ['landing', 'login', 'register', 'not-found']
 
 const router = createRouter({
@@ -75,18 +82,37 @@ const router = createRouter({
     },
 
     {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../features/admin/views/AdminPage.vue'),
+      meta: { requiresAdmin: true },
+    },
+
+    {
+      path: '/403',
+      name: 'forbidden',
+      component: () => import('../features/error/views/ForbiddenPage.vue'),
+    },
+
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('../features/error/views/NotFoundPage.vue'),
-    }
+    },
   ],
 })
 
 router.beforeEach((to) => {
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, user } = useAuth()
 
   if (!publicRoutes.includes(to.name as string) && !isLoggedIn.value) {
     return { name: 'login' }
+  }
+
+  // camada de UX: o backend ainda exige o middleware admin; aqui evitamos
+  // flash de conteudo para quem esta logado mas nao e administrador
+  if (to.meta.requiresAdmin && !user.value?.is_admin) {
+    return { name: 'forbidden' }
   }
 })
 
