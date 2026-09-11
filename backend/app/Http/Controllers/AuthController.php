@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -30,7 +31,7 @@ class AuthController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return response()->json($user, 201);
+        return response()->json(new UserResource($user), 201);
     }
 
     public function login(Request $request)
@@ -40,14 +41,14 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::guard('web')->attempt($credentials)) {
+        if (! Auth::guard('web')->attempt($credentials)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         // troca o id de sessao apos o login para evitar session fixation
         $request->session()->regenerate();
 
-        return response()->json(['user' => Auth::guard('web')->user()]);
+        return response()->json(['user' => new UserResource(Auth::guard('web')->user())]);
     }
 
     public function logout(Request $request)

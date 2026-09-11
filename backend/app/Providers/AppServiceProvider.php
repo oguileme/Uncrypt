@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +17,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // recursos serializados sem o wrapper global "data" (padrao do projeto:
+        // /user e auth retornam o objeto direto, como os models crus faziam)
+        JsonResource::withoutWrapping();
+
         // teto global da API: protege contra abuso mesmo em rotas sem limite proprio
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(120)->by($request->user()?->id ?? $request->ip());

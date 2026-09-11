@@ -29,15 +29,19 @@ class FeedbackController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $data = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'context_url' => 'required|string',
             'feedback_text' => 'required|string',
             'feedback_type' => 'required|in:bug,feature_request,general',
         ]);
 
-        $feedback = Feedback::create($data);
+        // IDOR: o autor e sempre o usuario autenticado — nunca confia em user_id vindo do client
+        $feedback = Feedback::create([
+            'user_id' => auth()->id(),
+            'context_url' => $data['context_url'],
+            'feedback_text' => $data['feedback_text'],
+            'feedback_type' => $data['feedback_type'],
+        ]);
 
         return response()->json($feedback, 201);
     }

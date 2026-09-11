@@ -8,11 +8,12 @@ use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\TypeEncryptonController;
 use App\Http\Controllers\UserController;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    return new UserResource($request->user());
 })->middleware('auth:sanctum');
 
 // leitura dos tipos de cifra e publica (usada na landing e na listagem)
