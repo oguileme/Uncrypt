@@ -8,8 +8,9 @@ import AdminFeedbackSection from '../components/AdminFeedbackSection.vue'
 import AdminChallengesSection from '../components/AdminChallengesSection.vue'
 import AdminAchievementsSection from '../components/AdminAchievementsSection.vue'
 import AdminCiphersSection from '../components/AdminCiphersSection.vue'
+import AdminMetricsSection from '../components/AdminMetricsSection.vue'
 
-type AdminTab = 'feedback' | 'challenges' | 'achievements' | 'ciphers'
+type AdminTab = 'feedback' | 'challenges' | 'achievements' | 'ciphers' | 'metrics'
 
 const router = useRouter()
 const { user, setAuth } = useAuth()
@@ -97,13 +98,24 @@ function handleForbidden() {
           >
             Cifras
           </button>
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="activeTab === 'metrics'"
+            class="segmented-option"
+            :class="{ active: activeTab === 'metrics' }"
+            @click="activeTab = 'metrics'"
+          >
+            M&eacute;tricas
+          </button>
         </div>
 
         <div v-if="user?.is_admin" class="section-host">
           <AdminFeedbackSection v-if="activeTab === 'feedback'" @forbidden="handleForbidden" />
           <AdminChallengesSection v-else-if="activeTab === 'challenges'" @forbidden="handleForbidden" />
           <AdminAchievementsSection v-else-if="activeTab === 'achievements'" @forbidden="handleForbidden" />
-          <AdminCiphersSection v-else @forbidden="handleForbidden" />
+          <AdminCiphersSection v-else-if="activeTab === 'ciphers'" @forbidden="handleForbidden" />
+          <AdminMetricsSection v-else @forbidden="handleForbidden" />
         </div>
 
         <div v-else class="state-box">Seu acesso &eacute; restrito. Redirecionando...</div>
