@@ -374,6 +374,54 @@ textarea:disabled {
   color: var(--text-primary);
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 20px;
+  font-family: var(--font-body);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  color: var(--text-primary);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--bg-emphasis);
+  border-color: var(--border-emphasis);
+  text-decoration: none;
+}
+
+.btn-primary {
+  color: var(--text-on-emphasis);
+  background: var(--accent-green-dark);
+  border-color: rgba(63, 185, 80, 0.35);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-green-hover);
+  text-decoration: none;
+}
+
+.btn-primary:active {
+  background: var(--accent-green-dark);
+}
+
 .btn-spinner {
   width: 12px;
   height: 12px;
