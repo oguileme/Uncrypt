@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\AchievementUserController;
+use App\Http\Controllers\AdminMetricsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChallangeUserController;
 use App\Http\Controllers\ChallengeController;
@@ -23,7 +24,7 @@ Route::get('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'track.activity'])->group(function () {
     // mutacoes dos tipos de cifra exigem autenticacao, admin e rate limit
     Route::post('/type-encryption', [TypeEncryptonController::class, 'store'])->middleware(['throttle:writes', 'admin']);
     Route::put('/type-encryption/{typeEncrypton}', [TypeEncryptonController::class, 'update'])->middleware(['throttle:writes', 'admin']);
@@ -77,4 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/feedback/{feedback}', [FeedbackController::class, 'show'])->middleware(['admin', 'throttle:admin']);
     Route::patch('/feedback/{feedback}', [FeedbackController::class, 'update'])->middleware(['admin', 'throttle:writes']);
     Route::delete('/feedback/{feedback}', [FeedbackController::class, 'destroy'])->middleware(['admin', 'throttle:writes']);
+
+    // metricas do sistema (acessos e usuarios ativos): apenas admin
+    Route::get('/admin/metrics', AdminMetricsController::class)->middleware(['admin', 'throttle:admin']);
 });

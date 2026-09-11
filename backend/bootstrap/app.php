@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\AdminOnly;
+use App\Http\Middleware\HttpCache;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\TrackActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,12 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => null);
 
         // adiciona headers de seguranca HTTP em todas as respostas
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->append(SecurityHeaders::class);
 
         // habilita cache HTTP no browser para rotas GET publicas/estaticas
         $middleware->alias([
-            'cache.public' => \App\Http\Middleware\HttpCache::class,
-            'admin' => \App\Http\Middleware\AdminOnly::class,
+            'cache.public' => HttpCache::class,
+            'admin' => AdminOnly::class,
+            'track.activity' => TrackActivity::class,
         ]);
 
         // reconhece requisicoes do frontend SPA (localhost:5173) via Sanctum,
