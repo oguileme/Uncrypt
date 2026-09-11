@@ -51,8 +51,20 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 ### Gamificação
 
 - XP por desafio concluído com level up automático (curva de progressão crescente a cada nível)
-- Sequência de dias (streak): conta dias consecutivos com pelo menos um desafio concluído, exposto em `/api/user/metrics` (idempotente — não infla por repetir concluídos no mesmo dia)
+- Sequência de dias (streak): conta dias consecutivos com pelo menos um desafio concluído, exposto em `/api/user/metrics` (idempotente — não infla por repetir concluídos no mesmo dia); a partir do segundo dia consecutivo cada conclusão ganha bônus de XP com multiplicador de 5% por dia de streak (capped em 2x)
 - Conquistas: conteúdos/definições gerenciados por admin, com progresso individual do usuário e recompensa em XP
+
+### Ranking e histórico
+
+- Ranking (leaderboard) de usuários por nível e progresso de XP (`GET /api/ranking`, cache 60s), com destaque das 3 primeiras posições e do próprio usuário
+- Histórico de desafios do usuário (`GET /api/user/history`): lista paginada com status (concluído/em andamento), tipo de cifra, XP, tempo, tentativas e uso de dica, da mais recente para a mais antiga
+- Página de Configurações com alternância de tema claro/escuro, dados da conta e visão da sessão
+
+### Feedback
+
+- Widget global disponível em todas as páginas autenticadas: botão flutuante que abre um painel para reportar **bugs**, **sugestões** ou comentários **gerais**
+- Cada envio guarda o tipo, o texto, `user_id` do usuário logado e `context_url` (URL da página onde o feedback foi feito)
+- Registros nascem com status `new` (fluxo futuro de gestão: `in_progress` e `resolved`); envio com rate limit próprio (`writes`, 60/min por usuário)
 
 ## Endpoints principais da API
 
@@ -65,6 +77,8 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 | GET | `/api/user` | autenticado | Usuário logado |
 | GET | `/api/user/metrics` | autenticado | Métricas de desempenho incl. streak (cache 60s) |
 | GET | `/api/user/recent-activity` | autenticado | Últimas atividades em `challenge_user` (query `?limit=`, default 5, máx 20) |
+| GET | `/api/ranking` | autenticado | Ranking de usuários por nível e XP (query `?limit=`, default 10, máx 50, cache 60s) |
+| GET | `/api/user/history` | autenticado | Histórico de desafios do usuário (query `?per_page=`, default 15, máx 50) |
 | GET | `/api/type-encryption` | pública | Lista os tipos de cifra |
 | POST/PUT/DELETE | `/api/type-encryption[/{id}]` | admin (throttle: writes) | Escritas de tipos de cifra |
 | GET | `/api/challenges` | autenticado | Lista desafios |
@@ -75,6 +89,7 @@ O Uncrypt é um sistema onde o usuário escolhe uma cifra, inicia um desafio que
 | GET | `/api/achievement` | autenticado | Lista conquistas (definições) |
 | POST/PUT/DELETE | `/api/achievement[/{id}]` | admin | Escritas de conquistas |
 | GET/POST/PUT/DELETE | `/api/achievement-progress[/{id}]` | autenticado (dono) | Progresso do usuário nas conquistas |
+| POST | `/api/feedback` | autenticado (throttle: writes) | Registra feedback (bug/sugestão/geral) com a URL de contexto |
 
 > Exceto rotas marcadas como públicas, todas exigem autenticação; rotas de escrita exigem o header `X-XSRF-TOKEN` (pipeline SPA). Além dos limites específicos acima, toda a API está sujeita ao teto global `api` (120/min por usuário ou IP).
 
@@ -84,7 +99,7 @@ O backend usa PHPUnit com cobertura das principais garantias: auth SPA (sessão/
 
 ```bash
 cd backend
-composer test          # suíte completa (PHPUnit) — 35 testes
+composer test          # suíte completa (PHPUnit) — 52 testes
 
 cd frontend
 npx vue-tsc --noEmit   # checagem de tipos
@@ -94,8 +109,8 @@ npx oxlint             # lint
 ## Próximos passos
 
 - Novos tipos de cifra (Playfair e outras)
-- Histórico de desafios e reforço dos já resolvidos
-- Recompensas por sequência de dias (bônus de XP no streak)
+- Refazer (reforço) dos desafios já concluídos a partir do histórico
+- Gestão de feedback (painel admin com status `in_progress`/`resolved`)
 
 ### Infraestrutura
 

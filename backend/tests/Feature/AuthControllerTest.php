@@ -50,6 +50,26 @@ class AuthControllerTest extends TestCase
         $this->assertAuthenticated('web');
     }
 
+    public function test_register_cannot_supply_is_admin_flag(): void
+    {
+        $password = 'senha-segura-123';
+
+        $response = $this->withHeader('Origin', 'http://localhost')
+            ->postJson('/api/register', [
+                'name' => 'Mero Usuario',
+                'username' => 'mero_usuario',
+                'email' => 'mero@uncrypt.test',
+                'password' => $password,
+                'password_confirmation' => $password,
+                'is_admin' => true,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('is_admin', false);
+
+        $this->assertFalse(User::where('email', 'mero@uncrypt.test')->firstOrFail()->is_admin);
+    }
+
     public function test_register_requires_confirmed_password(): void
     {
         $response = $this->withHeader('Origin', 'http://localhost')

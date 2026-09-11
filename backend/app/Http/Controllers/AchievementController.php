@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Achievement;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 
 class AchievementController extends Controller
@@ -40,6 +41,13 @@ class AchievementController extends Controller
         ]);
 
         $achievement = Achievement::create($data);
+
+        AdminAudit::record([
+            'action' => 'achievement.created',
+            'target_type' => 'achievement',
+            'target_id' => $achievement->id,
+            'changes' => $data,
+        ]);
 
         return response()->json($achievement, 201);
     }
@@ -80,6 +88,13 @@ class AchievementController extends Controller
 
         $achievement->update($data);
 
+        AdminAudit::record([
+            'action' => 'achievement.updated',
+            'target_type' => 'achievement',
+            'target_id' => $achievement->id,
+            'changes' => $achievement->getChanges(),
+        ]);
+
         return response()->json($achievement);
     }
 
@@ -89,6 +104,13 @@ class AchievementController extends Controller
     public function destroy(Achievement $achievement)
     {
         //
+        AdminAudit::record([
+            'action' => 'achievement.deleted',
+            'target_type' => 'achievement',
+            'target_id' => $achievement->id,
+            'changes' => ['name' => $achievement->name],
+        ]);
+
         $achievement->delete();
 
         return response()->json(null, 204);

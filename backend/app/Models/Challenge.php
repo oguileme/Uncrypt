@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use App\Helpers\CipherHelper;
-use Database\Factories\ChallengeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 
 class Challenge extends Model
 {
@@ -15,7 +13,7 @@ class Challenge extends Model
 
     protected $table = 'challenge';
 
-    protected $fillable = ['title', 'description', 'type_encryption_id', 'phrase', 'key', 'xp', 'is_active'];
+    protected $fillable = ['title', 'description', 'type_encryption_id', 'phrase', 'key', 'xp', 'is_active', 'hint'];
 
     public function users()
     {
@@ -23,7 +21,6 @@ class Challenge extends Model
             ->withPivot('completed', 'attempts')
             ->withTimestamps();
     }
-
 
     public function typeEncryption()
     {

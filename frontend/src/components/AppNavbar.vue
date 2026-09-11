@@ -3,10 +3,16 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { logout } from '@/features/auth/services/authService'
 import { useAuth } from '@/features/auth/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 import ThemeToggle from './ThemeToggle.vue'
+import logoDark from '@/assets/uncrypt fonte sem fundo.png'
+import logoLight from '@/assets/uncrypt-fonte-preta-sem-fundo.png'
 
 const router = useRouter()
 const { clearAuth, isLoggedIn, user } = useAuth()
+const { theme } = useTheme()
+
+const navbarLogo = computed(() => (theme.value === 'light' ? logoLight : logoDark))
 
 const userInitials = computed(() => {
   const name = user.value?.name?.trim()
@@ -58,7 +64,7 @@ onUnmounted(() => {
   <nav class="navbar">
     <div class="navbar-inner">
       <RouterLink to="/" class="navbar-brand">
-        <img src="@/assets/uncrypt fonte sem fundo.png" alt="Uncrypt" class="navbar-logo" />
+        <img :src="navbarLogo" alt="Uncrypt" class="navbar-logo" />
       </RouterLink>
 
       <button class="menu-toggle" @click="menuOpen = !menuOpen" :class="{ active: menuOpen }">
@@ -93,7 +99,14 @@ onUnmounted(() => {
           >
             Conquistas
           </RouterLink>
-          <a href="#" class="nav-link" @click="menuOpen = false">Ranking</a>
+          <RouterLink
+            to="/ranking"
+            class="nav-link"
+            :class="{ active: route.path === '/ranking' }"
+            @click="menuOpen = false"
+          >
+            Ranking
+          </RouterLink>
         </template>
         <template v-else>
           <a href="#features" class="nav-link" @click="menuOpen = false">Funcionalidades</a>
@@ -130,13 +143,27 @@ onUnmounted(() => {
                     </svg>
                     Meu Perfil
                   </RouterLink>
-                  <a href="#" class="dropdown-item" @click="closeDropdown">
+                  <RouterLink v-if="user?.is_admin" to="/admin" class="dropdown-item" @click="closeDropdown">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M12 2l7 4v6c0 4.4-3 8.5-7 10-4-1.5-7-5.6-7-10V6l7-4z" />
+                      <path d="M9.5 12l2 2 3.5-3.5" />
+                    </svg>
+                    Painel Admin
+                  </RouterLink>
+                  <RouterLink to="/history" class="dropdown-item" @click="closeDropdown">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <circle cx="12" cy="12" r="1" />
+                      <path d="M12 7v5l3 2M12 3a9 9 0 1 0 9 9" />
+                    </svg>
+                    Hist&oacute;rico
+                  </RouterLink>
+                  <RouterLink to="/settings" class="dropdown-item" @click="closeDropdown">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <circle cx="12" cy="12" r="3" />
                       <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                     </svg>
                     Configura&ccedil;&otilde;es
-                  </a>
+                  </RouterLink>
                   <div class="dropdown-divider"></div>
                   <button class="dropdown-item dropdown-item-danger" @click="handleLogout">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

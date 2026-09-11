@@ -7,6 +7,7 @@ export interface UserType {
     level: number;
     xp_progress: number;
     xp_levelup: number;
+    is_admin?: boolean;
     created_at: string;
 }
 

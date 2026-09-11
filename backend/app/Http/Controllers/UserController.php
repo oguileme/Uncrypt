@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChallengeUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Models\ChallengeUser;
 
 class UserController extends Controller
 {
@@ -13,7 +14,7 @@ class UserController extends Controller
      */
     public function getUserMetrics()
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -46,7 +47,7 @@ class UserController extends Controller
      */
     public function getRecentActivity(Request $request)
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -60,13 +61,69 @@ class UserController extends Controller
             ->limit($limit)
             ->get()
             ->map(fn ($cu) => [
-                'id'        => $cu->id,
+                'id' => $cu->id,
                 'challenge' => $cu->challenge?->title ?? 'Desafio excluído',
-                'result'    => $cu->completed ? 'correct' : 'wrong',
-                'time'      => $cu->created_at->locale('pt_BR')->diffForHumans(),
-                'attempts'  => $cu->attempts,
+                'result' => $cu->completed ? 'correct' : 'wrong',
+                'time' => $cu->created_at->locale('pt_BR')->diffForHumans(),
+                'attempts' => $cu->attempts,
             ]);
 
         return response()->json($activities);
+    }
+
+    /**
+     * Retorna o historico de desafios do usuario logado (paginaod).
+     */
+    public function getHistory(Request $request)
+    {
+        if (! auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $perPage = max(5, min((int) $request->integer('per_page', 15), 50));
+
+        $history = ChallengeUser::where('user_id', auth()->id())
+            ->with(['challenge:id,title,xp,type_encryption_id', 'challenge.typeEncryption:id,name'])
+            ->orderByDesc('updated_at')
+            ->paginate($perPage)
+            ->through(fn ($cu) => [
+                'id' => $cu->id,
+                'challenge' => $cu->challenge?->title ?? 'Desafio excluído',
+                'type' => $cu->challenge?->typeEncryption?->name ?? null,
+                'xp' => $cu->challenge?->xp,
+                'completed' => (bool) $cu->completed,
+                'attempts' => $cu->attempts,
+                'hint_used' => (bool) $cu->hint_used,
+                'time_taken' => $cu->time_taken,
+                'concluded_at' => $cu->completed ? $cu->updated_at->toIso8601String() : null,
+            ]);
+
+        return response()->json($history);
+    }
+
+    /**
+     * Retorna o ranking dos usuarios por nivel e progresso de XP.
+     */
+    public function getRanking(Request $request)
+    {
+        if (! auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // padrao 10, aceita ate 50; a chave inclui o limite para nao vazar ordenacao entre pedidos
+        $limit = max(10, min((int) $request->integer('limit', 10), 50));
+
+        $ranking = Cache::remember("ranking.top.{$limit}", 60, function () use ($limit) {
+            return User::query()
+                ->where('is_admin', false)
+                ->orderByDesc('level')
+                ->orderByDesc('xp_progress')
+                ->orderBy('name')
+                ->limit($limit)
+                ->get(['id', 'name', 'username', 'level', 'xp_progress', 'current_streak'])
+                ->toArray();
+        });
+
+        return response()->json($ranking);
     }
 }
