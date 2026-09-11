@@ -71,4 +71,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // feedback: usuarios autenticados reportam bugs/sugestoes com o contexto da pagina
     Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:writes');
+
+    // gestao do feedback: apenas admin (listar, detalhar, alterar status, remover)
+    Route::get('/feedback', [FeedbackController::class, 'index'])->middleware(['admin', 'throttle:admin']);
+    Route::get('/feedback/{feedback}', [FeedbackController::class, 'show'])->middleware(['admin', 'throttle:admin']);
+    Route::patch('/feedback/{feedback}', [FeedbackController::class, 'update'])->middleware(['admin', 'throttle:writes']);
+    Route::delete('/feedback/{feedback}', [FeedbackController::class, 'destroy'])->middleware(['admin', 'throttle:writes']);
 });

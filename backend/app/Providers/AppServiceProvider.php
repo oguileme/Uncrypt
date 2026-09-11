@@ -43,5 +43,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('writes', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
         });
+
+        // limitam leituras do painel administrativo (listagens/auditoria)
+        RateLimiter::for('admin', function (Request $request) {
+            return Limit::perMinute(120)->by($request->user()?->id ?? $request->ip());
+        });
     }
 }

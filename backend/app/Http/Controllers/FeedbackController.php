@@ -3,25 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Feedback;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 
 class FeedbackController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listagem admin do feedback: paginada, com filtros por status e tipo.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        return Feedback::all();
-    }
+        $perPage = max(5, min((int) $request->integer('per_page', 15), 50));
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $feedbacks = Feedback::query()
+            ->with('user:id,name,username,email')
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->filled('feedback_type'), fn ($q) => $q->where('feedback_type', $request->string('feedback_type')))
+            ->latest()
+            ->paginate($perPage);
+
+        return response()->json($feedbacks);
     }
 
     /**
@@ -51,42 +52,42 @@ class FeedbackController extends Controller
      */
     public function show(Feedback $feedback)
     {
-        //
-        return response()->json($feedback);
+        return response()->json($feedback->load('user:id,name,username,email'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Feedback $feedback)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Admin troca o status do feedback; nunca reescreve o conteudo reportado.
      */
     public function update(Request $request, Feedback $feedback)
     {
-        //
         $data = $request->validate([
-            'context_url' => 'sometimes|string',
-            'feedback_text' => 'sometimes|string',
-            'feedback_type' => 'sometimes|in:bug,feature_request,general',
-            'status' => 'sometimes|in:new,in_progress,resolved',
+            'status' => 'required|in:new,in_progress,resolved',
         ]);
 
         $feedback->update($data);
 
+        AdminAudit::record([
+            'action' => 'feedback.status_changed',
+            'target_type' => 'feedback',
+            'target_id' => $feedback->id,
+            'changes' => ['status' => $data['status']],
+        ]);
+
         return response()->json($feedback);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage (spam/bots).
      */
     public function destroy(Feedback $feedback)
     {
-        //
+        AdminAudit::record([
+            'action' => 'feedback.deleted',
+            'target_type' => 'feedback',
+            'target_id' => $feedback->id,
+            'changes' => ['id' => $feedback->id, 'feedback_type' => $feedback->feedback_type],
+        ]);
+
         $feedback->delete();
 
         return response()->json(null, 204);
